@@ -1,0 +1,225 @@
+/*
+ * Copyright 2018, Oath Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#import "FlurryUnityPlugin.h"
+#import "Flurry.h"
+
+@implementation FlurryUnityPlugin
+
+
+
+NSString* strToNSStr(const char* str)
+{
+    if (!str)
+        return [NSString stringWithUTF8String: ""];
+    
+    return [NSString stringWithUTF8String: str];
+}
+
+char* strDup(const char* str)
+{
+    if (!str)
+        return NULL;
+    
+    return strcpy((char*)malloc(strlen(str) + 1), str);
+    
+}
+    
+    NSMutableDictionary* keyValueToDict(const char* keys, const char* values)
+    {
+        if (!keys || !values)
+        {
+            return nil;
+        }
+        
+        NSMutableDictionary* dict = [[NSMutableDictionary alloc] init];
+        
+        NSArray* keysArray = [strToNSStr(keys) componentsSeparatedByString : @"\n"];
+        NSArray* valuesArray = [strToNSStr(values) componentsSeparatedByString : @"\n"];
+        
+        for (int i = 0; i < [keysArray count]; i++)
+        {
+            [dict setObject:[valuesArray objectAtIndex: i] forKey:[keysArray objectAtIndex: i]];
+        }
+        
+        return dict;
+    }
+
+extern "C" {
+    
+    FlurrySessionBuilder* builder;
+    
+    const void initializeFlurrySessionBuilder() {
+        builder = [FlurrySessionBuilder new];
+    }
+    
+    const void flurryWithCrashReporting(bool crashReporting){
+        [builder withCrashReporting: crashReporting];
+    }
+    
+    const void flurryWithLogLevel(int logLevel){
+        [builder withLogLevel: FlurryLogLevelAll];
+    }
+    
+    const void flurryWithLogEnabled(bool logEnabled){
+       // [builder withLogEnabled: logEnabled];
+    }
+    
+    const void flurryWithSessionContinueSeconds(long seconds){
+        [builder withSessionContinueSeconds: seconds];
+    }
+    
+    const void flurryWithIncludeBackgroundSessionsInMetrics(bool includeBackgroundSessionsInMetrics){
+        [builder withIncludeBackgroundSessionsInMetrics: includeBackgroundSessionsInMetrics];
+    }
+    
+    const void flurryWithAppVersion(const char *appVersion){
+        NSString *appVersionStr = strToNSStr(appVersion);
+        [builder withAppVersion: appVersionStr];
+    }
+    
+    const void flurryStartSessionWithSessionBuilder(const char *apiKey){
+        NSString *apiKeyStr = strToNSStr(apiKey);
+        
+        [Flurry startSession:apiKeyStr withSessionBuilder:builder];
+    }
+    
+    const void mStopSession(){
+        //    [Flurry stopSession];
+    }
+    
+    const int flurryLogEvent(const char *eventName){
+        NSString *eventNameStr=strToNSStr(eventName);
+        return [Flurry logEvent:eventNameStr];
+    }
+    
+    const int flurryLogEventWithParameter(const char* eventName, const char* keys, const char* values){
+        NSString *eventNameStr=strToNSStr(eventName);
+        return [Flurry logEvent: eventNameStr withParameters:keyValueToDict(keys,values)];
+    }
+    
+    const int flurryLogTimedEventWithParams(const char* eventName, const char* keys, const char* values, bool isTimed) {
+        NSString *eventNameStr=strToNSStr(eventName);
+        return [Flurry logEvent:eventNameStr withParameters:keyValueToDict(keys,values) timed:isTimed];
+    }
+    
+    const void flurrySetUserId(const char* userId) {
+        NSString *userIdStr = strToNSStr(userId);
+        [Flurry setUserID:userIdStr];
+    }
+    
+    const void flurrySetAge(const int age) {
+        [Flurry setAge:age];
+    }
+    
+    const void flurrySetGender(const char* gender) {
+        NSString *genderStr = strToNSStr(gender);
+        [Flurry setGender:genderStr];
+    }
+    
+    const void flurryLogPageView() {
+       [Flurry logPageView];
+    }
+    
+    
+    const void flurryLogError(const char* errorId, const char* message, const char* errorClass) {
+        [Flurry logError:strToNSStr(errorId) message:strToNSStr(message) exception:[[NSException alloc] initWithName:strToNSStr(errorClass) reason:@"" userInfo:nil] withParameters: nil];
+    }
+    
+    const void flurryLogErrorWithParams(const char* errorId, const char* message, const char* errorClass, const char* keys, const char* values) {
+        
+        [Flurry logError:strToNSStr(errorId) message:strToNSStr(message) exception:[[NSException alloc] initWithName:strToNSStr(errorClass) reason:@"" userInfo:nil] withParameters: keyValueToDict(keys,values)];
+    }
+    
+    const void flurryAddOrigin(const char* originName, const char* originVersion) {
+        NSString *originNameStr = strToNSStr(originName);
+        NSString *originVersionStr = strToNSStr(originVersion);
+        
+        [Flurry addOrigin:originNameStr withVersion:originVersionStr];
+    }
+    
+    const void flurrySetSessionOrigin(const char* originName, const char* deepLink) {
+        NSString *originNameStr = strToNSStr(originName);
+        NSString *deepLinkStr = strToNSStr(deepLink);
+        
+        [Flurry addSessionOrigin:originNameStr withDeepLink:deepLinkStr];
+    }
+    
+    const void flurrySetVersionName(const char* versionName) {
+        NSString *versionNameStr = strToNSStr(versionName);
+        [Flurry setAppVersion:versionNameStr];
+    }
+    
+    const void flurryAddSessionProperty(const char* name, const char* value) {
+        
+        [Flurry sessionProperties: keyValueToDict(name, value)];
+    }
+        
+    
+    const void flurryAddOriginWithParams(const char* originName,const char* originVersion,const char* keys,const char* values){
+        
+        NSString *originNameStr = strToNSStr(originName);
+        NSString *originVersionStr = strToNSStr(originVersion);
+        
+        [Flurry addOrigin: originNameStr withVersion: originVersionStr withParameters: keyValueToDict(keys,values)];
+    }
+    
+    const char* flurryGetAgentVersion()
+    {
+        return strDup([[Flurry getFlurryAgentVersion] UTF8String]);
+    }
+    
+    const char* flurryGetReleaseVersion()
+    {
+        return strDup([[Flurry getFlurryAgentVersion] UTF8String]);
+    }
+    
+    const char* flurryGetSessionId()
+    {
+        return strDup([[Flurry getSessionID] UTF8String]);
+    }
+    
+    const void flurryLogTimedEvent(const char* eventId, bool isTimed) {
+        NSString *eventIdStr = strToNSStr(eventId);
+        [Flurry logEvent:eventIdStr withParameters:nil timed:isTimed];
+    }
+    
+    const void flurryEndTimedEvent(const char* eventName) {
+        NSString *eventNameStr = strToNSStr(eventName);
+        [Flurry endTimedEvent:eventNameStr withParameters:nil];
+    }
+    
+    const void flurryEndTimedEventWithParams(const char* eventName, const char* keys,const char* values) {
+        
+        NSString *eventNameStr = strToNSStr(eventName);
+        
+        [Flurry endTimedEvent:eventNameStr withParameters:keyValueToDict(keys,values)];
+    }
+
+    const void flurryLogBreadcrumb(const char* crashBreadcrumb){
+        
+        
+        NSString *crashBreadcrumbStr = strToNSStr(crashBreadcrumb);
+        
+        [Flurry leaveBreadcrumb:crashBreadcrumbStr];
+    }
+    
+    const void flurrySetIAPReportingEnabled(bool enableIAP){
+        [Flurry setIAPReportingEnabled: enableIAP];
+    }
+}
+
+@end
