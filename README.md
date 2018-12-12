@@ -23,7 +23,7 @@ A Unity plugin for Flurry SDK
 
 ### Android
 
-To improve analytics identities, this plugin includes Google Play Services libraries, please see [Manual Flurry Android SDK Integration](https://developer.yahoo.com/flurry/docs/integrateflurry/android-manual/) for more information. You can replace these libraries with your existing ones if needed.
+To improve analytics identities, please see [Manual Flurry Android SDK Integration](https://developer.yahoo.com/flurry/docs/integrateflurry/android-manual/) for adding Google Play Services library in your app by including `play-services-base` and `play-services-ads` libraries.
 
 ### iOS
 
@@ -44,11 +44,11 @@ public class FlurryStart : MonoBehaviour
 {
 
 #if UNITY_ANDROID
-    private string FLURRY_API_KEY = FLURRY_ANDROID_API_KEY;
+    private readonly string FLURRY_API_KEY = FLURRY_ANDROID_API_KEY;
 #elif UNITY_IPHONE
-    private string FLURRY_API_KEY = FLURRY_IOS_API_KEY;
+    private readonly string FLURRY_API_KEY = FLURRY_IOS_API_KEY;
 #else
-    private string FLURRY_API_KEY = null;
+    private readonly string FLURRY_API_KEY = null;
 #endif
 
     void Start()

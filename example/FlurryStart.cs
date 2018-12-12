@@ -23,11 +23,11 @@ public class FlurryStart : MonoBehaviour
 {
 
 #if UNITY_ANDROID
-    private string FLURRY_API_KEY = FLURRY_ANDROID_API_KEY;
+    private readonly string FLURRY_API_KEY = FLURRY_ANDROID_API_KEY;
 #elif UNITY_IPHONE
-    private string FLURRY_API_KEY = FLURRY_IOS_API_KEY;
+    private readonly string FLURRY_API_KEY = FLURRY_IOS_API_KEY;
 #else
-    private string FLURRY_API_KEY = null;
+    private readonly string FLURRY_API_KEY = null;
 #endif
 
     void Start()
