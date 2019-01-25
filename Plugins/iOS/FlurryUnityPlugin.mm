@@ -37,30 +37,31 @@ char* strDup(const char* str)
     return strcpy((char*)malloc(strlen(str) + 1), str);
     
 }
-    
-    NSMutableDictionary* keyValueToDict(const char* keys, const char* values)
+
+NSMutableDictionary* keyValueToDict(const char* keys, const char* values)
+{
+    if (!keys || !values)
     {
-        if (!keys || !values)
-        {
-            return nil;
-        }
-        
-        NSMutableDictionary* dict = [[NSMutableDictionary alloc] init];
-        
-        NSArray* keysArray = [strToNSStr(keys) componentsSeparatedByString : @"\n"];
-        NSArray* valuesArray = [strToNSStr(values) componentsSeparatedByString : @"\n"];
-        
-        for (int i = 0; i < [keysArray count]; i++)
-        {
-            [dict setObject:[valuesArray objectAtIndex: i] forKey:[keysArray objectAtIndex: i]];
-        }
-        
-        return dict;
+        return nil;
     }
+    
+    NSMutableDictionary* dict = [[NSMutableDictionary alloc] init];
+    
+    NSArray* keysArray = [strToNSStr(keys) componentsSeparatedByString : @"\n"];
+    NSArray* valuesArray = [strToNSStr(values) componentsSeparatedByString : @"\n"];
+    
+    for (int i = 0; i < [keysArray count]; i++)
+    {
+        [dict setObject:[valuesArray objectAtIndex: i] forKey:[keysArray objectAtIndex: i]];
+    }
+    
+    return dict;
+}
 
 extern "C" {
     
     FlurrySessionBuilder* builder;
+    bool FlurryLogEnabled = true;
     
     const void initializeFlurrySessionBuilder() {
         builder = [FlurrySessionBuilder new];
@@ -71,12 +72,27 @@ extern "C" {
     }
     
     const void flurryWithLogLevel(int logLevel){
-        [builder withLogLevel: FlurryLogLevelAll];
+        
+        if (FlurryLogEnabled) {
+            if (logLevel == 2) {
+                [builder withLogLevel: FlurryLogLevelAll];
+            } else if (logLevel == 3 || logLevel == 4 || logLevel == 5) {
+                [builder withLogLevel: FlurryLogLevelDebug];
+            } else {
+                [builder withLogLevel: FlurryLogLevelCriticalOnly]; //default
+            }
+        }
+        
     }
-    
-    const void flurryWithLogEnabled(bool logEnabled){
-       // [builder withLogEnabled: logEnabled];
-    }
+        
+        const void flurryWithLogEnabled(bool logEnabled){
+            if (logEnabled == false) {
+                [builder withLogLevel: FlurryLogLevelNone];
+                FlurryLogEnabled = false;
+            } else {
+                FlurryLogEnabled = true;
+            }
+        }
     
     const void flurryWithSessionContinueSeconds(long seconds){
         [builder withSessionContinueSeconds: seconds];
@@ -95,10 +111,6 @@ extern "C" {
         NSString *apiKeyStr = strToNSStr(apiKey);
         
         [Flurry startSession:apiKeyStr withSessionBuilder:builder];
-    }
-    
-    const void mStopSession(){
-        //    [Flurry stopSession];
     }
     
     const int flurryLogEvent(const char *eventName){
@@ -131,7 +143,7 @@ extern "C" {
     }
     
     const void flurryLogPageView() {
-       [Flurry logPageView];
+        [Flurry logPageView];
     }
     
     
@@ -167,7 +179,7 @@ extern "C" {
         
         [Flurry sessionProperties: keyValueToDict(name, value)];
     }
-        
+    
     
     const void flurryAddOriginWithParams(const char* originName,const char* originVersion,const char* keys,const char* values){
         
@@ -208,7 +220,7 @@ extern "C" {
         
         [Flurry endTimedEvent:eventNameStr withParameters:keyValueToDict(keys,values)];
     }
-
+    
     const void flurryLogBreadcrumb(const char* crashBreadcrumb){
         
         
