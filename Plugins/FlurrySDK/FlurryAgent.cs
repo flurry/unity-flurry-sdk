@@ -50,7 +50,7 @@ namespace FlurrySDKInternal
 
         abstract public void AddOrigin(string originName, string originVersion);
 
-        abstract public void AddOrigin(string originName, string originVersion, Dictionary<string, string> originParameters);
+        abstract public void AddOrigin(string originName, string originVersion, IDictionary<string, string> originParameters);
 
         abstract public void AddSessionProperty(string name, string value);
 
@@ -64,24 +64,24 @@ namespace FlurrySDKInternal
 
         abstract public int LogEvent(string eventId, bool timed);
 
-        abstract public int LogEvent(string eventId, Dictionary<string, string> parameters);
+        abstract public int LogEvent(string eventId, IDictionary<string, string> parameters);
 
-        abstract public int LogEvent(string eventId, Dictionary<string, string> parameters, bool timed);
+        abstract public int LogEvent(string eventId, IDictionary<string, string> parameters, bool timed);
 
         abstract public void EndTimedEvent(string eventId);
 
-        abstract public void EndTimedEvent(string eventId, Dictionary<string, string> parameters);
+        abstract public void EndTimedEvent(string eventId, IDictionary<string, string> parameters);
 
         abstract public void OnPageView();
 
         abstract public void OnError(string errorId, string message, string errorClass);
 
-        abstract public void OnError(string errorId, string message, string errorClass, Dictionary<string, string> parameters);
+        abstract public void OnError(string errorId, string message, string errorClass, IDictionary<string, string> parameters);
 
         abstract public void LogBreadcrumb(string crashBreadcrumb);
 
         abstract public int LogPayment(string productName, string productId, int quantity, double price,
-                                       string currency, string transactionId, Dictionary<string, string> parameters);
+                                       string currency, string transactionId, IDictionary<string, string> parameters);
 
         abstract public void SetIAPReportingEnabled(bool enableIAP);
 

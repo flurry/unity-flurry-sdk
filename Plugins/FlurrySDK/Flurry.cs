@@ -32,7 +32,7 @@ namespace FlurrySDK
     public class Flurry : IDisposable
     {
         // init static Flurry agent object.
-        private static FlurryAgent flurryAgent = null;
+        private static FlurryAgent flurryAgent;
         static Flurry()
         {
 #if UNITY_ANDROID
@@ -91,7 +91,7 @@ namespace FlurrySDK
         /// </summary>
         public class Builder
         {
-            private FlurryAgent.AgentBuilder builder = null;
+            private FlurryAgent.AgentBuilder builder;
 
             public Builder()
             {
@@ -279,7 +279,7 @@ namespace FlurrySDK
         /// <param name="originName">Origin name.</param>
         /// <param name="originVersion">Origin version.</param>
         /// <param name="originParameters">Origin parameters.</param>
-        public static void AddOrigin(string originName, string originVersion, Dictionary<string, string> originParameters)
+        public static void AddOrigin(string originName, string originVersion, IDictionary<string, string> originParameters)
         {
             if (flurryAgent != null)
             {
@@ -379,7 +379,7 @@ namespace FlurrySDK
         /// <returns>The event recording status.</returns>
         /// <param name="eventId">Event identifier.</param>
         /// <param name="parameters">Event parameters.</param>
-        public static EventRecordStatus LogEvent(string eventId, Dictionary<string, string> parameters)
+        public static EventRecordStatus LogEvent(string eventId, IDictionary<string, string> parameters)
         {
             if (flurryAgent != null)
             {
@@ -396,7 +396,7 @@ namespace FlurrySDK
         /// <param name="eventId">Event identifier.</param>
         /// <param name="parameters">Event parameters.</param>
         /// <param name="timed">If set to <c>true</c> to log timed event.</param>
-        public static EventRecordStatus LogEvent(string eventId, Dictionary<string, string> parameters, bool timed)
+        public static EventRecordStatus LogEvent(string eventId, IDictionary<string, string> parameters, bool timed)
         {
             if (flurryAgent != null)
             {
@@ -424,7 +424,7 @@ namespace FlurrySDK
         /// </summary>
         /// <param name="eventId">Event identifier.</param>
         /// <param name="parameters">Event parameters.</param>
-        public static void EndTimedEvent(string eventId, Dictionary<string, string> parameters)
+        public static void EndTimedEvent(string eventId, IDictionary<string, string> parameters)
         {
             if (flurryAgent != null)
             {
@@ -464,7 +464,7 @@ namespace FlurrySDK
         /// <param name="message">Error message.</param>
         /// <param name="errorClass">Error class.</param>
         /// <param name="parameters">Error parameters.</param>
-        public static void OnError(string errorId, string message, string errorClass, Dictionary<string, string> parameters)
+        public static void OnError(string errorId, string message, string errorClass, IDictionary<string, string> parameters)
         {
             if (flurryAgent != null)
             {
@@ -497,7 +497,7 @@ namespace FlurrySDK
         /// <param name="parameters">Payment parameters.</param>
         public static EventRecordStatus LogPayment(
             string productName, string productId, int quantity, double price,
-            string currency, string transactionId, Dictionary<string, string> parameters)
+            string currency, string transactionId, IDictionary<string, string> parameters)
         {
             if (flurryAgent != null)
             {

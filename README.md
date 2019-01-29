@@ -13,7 +13,7 @@ A Unity plugin for Flurry SDK
 
 ## Installation
 
-1. Download the Flurry Unity package from [flurry-sdk-1.0.0.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-1.0.0.unitypackage).
+1. Download the Flurry Unity package from [flurry-sdk-1.1.0.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-1.1.0.unitypackage).
 2. Open your project in Unity Editor, choose menu **Assets** > **Import Package** > **Custom Package…** to bring up the File chooser, and select the package downloaded.
 3. Add Flurry code
    
@@ -74,7 +74,7 @@ public class FlurryStart : MonoBehaviour
         Debug.Log("Log Unity Event status: " + status);
 
         // Log Flurry timed events with parameters.
-        Dictionary<string, string> parameters = new Dictionary<string, string>();
+        IDictionary<string, string> parameters = new Dictionary<string, string>();
         parameters.Add("Author", "Flurry");
         parameters.Add("Status", "Registered");
         status = Flurry.LogEvent("Unity Event Params Timed", parameters, true);
@@ -112,7 +112,7 @@ See [Android](http://flurry.github.io/flurry-android-sdk/)-[(FlurryAgent)](http:
   void SetVersionName(string versionName);
 
   void AddOrigin(string originName, string originVersion);
-  void AddOrigin(string originName, string originVersion, Dictionary<string, string> originParameters);
+  void AddOrigin(string originName, string originVersion, IDictionary<string, string> originParameters);
   void AddSessionProperty(string name, string value);
   ```
 - **Methods to get Flurry versions**
@@ -127,21 +127,21 @@ See [Android](http://flurry.github.io/flurry-android-sdk/)-[(FlurryAgent)](http:
   ```c
   Flurry.EventRecordStatus LogEvent(string eventId);
   Flurry.EventRecordStatus LogEvent(string eventId, bool timed);
-  Flurry.EventRecordStatus LogEvent(string eventId, Dictionary<string, string> parameters);
-  Flurry.EventRecordStatus LogEvent(string eventId, Dictionary<string, string> parameters, bool timed);
+  Flurry.EventRecordStatus LogEvent(string eventId, IDictionary<string, string> parameters);
+  Flurry.EventRecordStatus LogEvent(string eventId, IDictionary<string, string> parameters, bool timed);
 
   void EndTimedEvent(string eventId);
-  void EndTimedEvent(string eventId, Dictionary<string, string> parameters);
+  void EndTimedEvent(string eventId, IDictionary<string, string> parameters);
 
   void OnPageView();
 
   void OnError(string errorId, string message, string errorClass);
-  void OnError(string errorId, string message, string errorClass, Dictionary<string, string> parameters);
+  void OnError(string errorId, string message, string errorClass, IDictionary<string, string> parameters);
 
   void LogBreadcrumb(string crashBreadcrumb);
   
   Flurry.EventRecordStatus LogPayment(string productName, string productId, int quantity, double price,
-                                      string currency, string transactionId, Dictionary<string, string> parameters);
+                                      string currency, string transactionId, IDictionary<string, string> parameters);
   ```
 - **Methods to enable IAP reporting (iOS)**
   

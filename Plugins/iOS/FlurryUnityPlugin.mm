@@ -19,8 +19,6 @@
 
 @implementation FlurryUnityPlugin
 
-
-
 NSString* strToNSStr(const char* str)
 {
     if (!str)
@@ -84,15 +82,15 @@ extern "C" {
         }
         
     }
-        
-        const void flurryWithLogEnabled(bool logEnabled){
-            if (logEnabled == false) {
-                [builder withLogLevel: FlurryLogLevelNone];
-                FlurryLogEnabled = false;
-            } else {
-                FlurryLogEnabled = true;
-            }
+    
+    const void flurryWithLogEnabled(bool logEnabled){
+        if (logEnabled == false) {
+            [builder withLogLevel: FlurryLogLevelNone];
+            FlurryLogEnabled = false;
+        } else {
+            FlurryLogEnabled = true;
         }
+    }
     
     const void flurryWithSessionContinueSeconds(long seconds){
         [builder withSessionContinueSeconds: seconds];

@@ -26,7 +26,7 @@ namespace FlurrySDKInternal
         public static NetworkReachability internetReachability = Application.internetReachability;
 
         private static readonly string ORIGIN_NAME = "unity-flurry-sdk";
-        private static readonly string ORIGIN_VERSION = "1.0.0";
+        private static readonly string ORIGIN_VERSION = "1.1.0";
 
         private static AndroidJavaClass cls_FlurryAgent = new AndroidJavaClass("com.flurry.android.FlurryAgent");
         private static AndroidJavaClass cls_FlurryAgentConstants = new AndroidJavaClass("com.flurry.android.Constants");
@@ -111,7 +111,7 @@ namespace FlurrySDKInternal
             cls_FlurryAgent.CallStatic("addOrigin", originName, originVersion);
         }
 
-        public override void AddOrigin(string originName, string originVersion, Dictionary<string, string> originParameters)
+        public override void AddOrigin(string originName, string originVersion, IDictionary<string, string> originParameters)
         {
             cls_FlurryAgent.CallStatic("addOrigin", originName, originVersion, ConvertMap(originParameters));
         }
@@ -148,13 +148,13 @@ namespace FlurrySDKInternal
             return result.Call<int>("ordinal");
         }
 
-        public override int LogEvent(string eventId, Dictionary<string, string> parameters)
+        public override int LogEvent(string eventId, IDictionary<string, string> parameters)
         {
             AndroidJavaObject result = cls_FlurryAgent.CallStatic<AndroidJavaObject>("logEvent", eventId, ConvertMap(parameters));
             return result.Call<int>("ordinal");
         }
 
-        public override int LogEvent(string eventId, Dictionary<string, string> parameters, bool timed)
+        public override int LogEvent(string eventId, IDictionary<string, string> parameters, bool timed)
         {
             AndroidJavaObject result = cls_FlurryAgent.CallStatic<AndroidJavaObject>("logEvent", eventId, ConvertMap(parameters), timed);
             return result.Call<int>("ordinal");
@@ -165,7 +165,7 @@ namespace FlurrySDKInternal
             cls_FlurryAgent.CallStatic("endTimedEvent", eventId);
         }
 
-        public override void EndTimedEvent(string eventId, Dictionary<string, string> parameters)
+        public override void EndTimedEvent(string eventId, IDictionary<string, string> parameters)
         {
             cls_FlurryAgent.CallStatic("endTimedEvent", eventId, ConvertMap(parameters));
         }
@@ -180,7 +180,7 @@ namespace FlurrySDKInternal
             cls_FlurryAgent.CallStatic("onError", errorId, message, errorClass);
         }
 
-        public override void OnError(string errorId, string message, string errorClass, Dictionary<string, string> parameters)
+        public override void OnError(string errorId, string message, string errorClass, IDictionary<string, string> parameters)
         {
             cls_FlurryAgent.CallStatic("onError", errorId, message, errorClass, ConvertMap(parameters));
         }
@@ -191,7 +191,7 @@ namespace FlurrySDKInternal
         }
 
         public override int LogPayment(string productName, string productId, int quantity, double price,
-                                       string currency, string transactionId, Dictionary<string, string> parameters)
+                                       string currency, string transactionId, IDictionary<string, string> parameters)
         {
             AndroidJavaObject result = cls_FlurryAgent.CallStatic<AndroidJavaObject>("logPayment", productName, productId,
                                                                                      quantity, price, currency, transactionId,
@@ -204,7 +204,7 @@ namespace FlurrySDKInternal
             Debug.Log("setIAPReportingEnabled is not supported on Android. Please use LogPayment instead.");
         }
 
-        private static AndroidJavaObject ConvertMap(Dictionary<string, string> dictionary)
+        private static AndroidJavaObject ConvertMap(IDictionary<string, string> dictionary)
         {
             AndroidJavaObject obj_HashMap = new AndroidJavaObject("java.util.HashMap");
             if (dictionary != null)

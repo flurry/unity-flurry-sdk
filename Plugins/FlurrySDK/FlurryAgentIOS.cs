@@ -26,7 +26,7 @@ namespace FlurrySDKInternal
     public class FlurryAgentIOS : FlurryAgent
     {
         private static readonly string ORIGIN_NAME = "unity-flurry-sdk";
-        private static readonly string ORIGIN_VERSION = "1.0.0";
+        private static readonly string ORIGIN_VERSION = "1.1.0";
 
         public FlurryAgentIOS()
         {
@@ -212,7 +212,7 @@ namespace FlurrySDKInternal
               flurryAddOrigin(originName, originVersion);
         }
 
-        public override void AddOrigin(string originName, string originVersion, Dictionary<string, string> originParameters)
+        public override void AddOrigin(string originName, string originVersion, IDictionary<string, string> originParameters)
         {
             string keys, values;
             ToKeyValue(originParameters, out keys, out values);
@@ -249,7 +249,7 @@ namespace FlurrySDKInternal
             return (int) flurryLogEvent(eventId);
         }
 
-        public override int LogEvent(string eventId, Dictionary<string, string> parameters)
+        public override int LogEvent(string eventId, IDictionary<string, string> parameters)
         {
             string keys, values;
             ToKeyValue(parameters, out keys, out values);
@@ -262,7 +262,7 @@ namespace FlurrySDKInternal
             return (int) flurryLogTimedEvent(eventId, timed);
         }
 
-        public override int LogEvent(string eventId, Dictionary<string, string> parameters, bool timed)
+        public override int LogEvent(string eventId, IDictionary<string, string> parameters, bool timed)
         { 
             string keys, values;
             ToKeyValue(parameters, out keys, out values);
@@ -274,7 +274,7 @@ namespace FlurrySDKInternal
             flurryEndTimedEvent(eventId);
         }
 
-        public override void EndTimedEvent(string eventId, Dictionary<string, string> parameters)
+        public override void EndTimedEvent(string eventId, IDictionary<string, string> parameters)
         {
             string keys, values;
             ToKeyValue(parameters, out keys, out values);
@@ -291,7 +291,7 @@ namespace FlurrySDKInternal
            flurryLogError(errorId, message, errorClass);
         }
 
-        public override void OnError(string errorId, string message, string errorClass, Dictionary<string, string> parameters)
+        public override void OnError(string errorId, string message, string errorClass, IDictionary<string, string> parameters)
         {
             string keys, values;
             ToKeyValue(parameters, out keys, out values);
@@ -304,7 +304,7 @@ namespace FlurrySDKInternal
         }
 
         public override int LogPayment(string productName, string productId, int quantity, double price,
-                                       string currency, string transactionId, Dictionary<string, string> parameters)
+                                       string currency, string transactionId, IDictionary<string, string> parameters)
         { 
             Debug.Log("Flurry iOS SDK does not implement LogPayment method.");
             return 1; 
@@ -317,7 +317,7 @@ namespace FlurrySDKInternal
 
         public override void Dispose() { }
 
-        private static void ToKeyValue(Dictionary<string, string> dictionary, out string keys, out string values)
+        private static void ToKeyValue(IDictionary<string, string> dictionary, out string keys, out string values)
         {
             var keysBuilder = new StringBuilder();
             var valuesBuilder = new StringBuilder();
