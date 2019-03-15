@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -32,11 +33,13 @@ public class FlurryStart : MonoBehaviour
 
     void Start()
     {
+        // Note: When enabling Messaging, Flurry Android should be initialized by using AndroidManifest.xml.
         // Initialize Flurry once.
         new Flurry.Builder()
                   .WithCrashReporting(true)
                   .WithLogEnabled(true)
                   .WithLogLevel(Flurry.LogLevel.LogVERBOSE)
+                  .WithMessaging(true)
                   .Build(FLURRY_API_KEY);
 
         // Example to get Flurry versions.
@@ -48,12 +51,15 @@ public class FlurryStart : MonoBehaviour
         Flurry.SetGender(Flurry.Gender.Female);
         Flurry.SetReportLocation(true);
 
+        // Set Messaging listener
+        Flurry.SetMessagingListener(new MyMessagingListener());
+
         // Log Flurry events.
         Flurry.EventRecordStatus status = Flurry.LogEvent("Unity Event");
         Debug.Log("Log Unity Event status: " + status);
 
         // Log Flurry timed events with parameters.
-        Dictionary<string, string> parameters = new Dictionary<string, string>();
+        IDictionary<string, string> parameters = new Dictionary<string, string>();
         parameters.Add("Author", "Flurry");
         parameters.Add("Status", "Registered");
         status = Flurry.LogEvent("Unity Event Params Timed", parameters, true);
@@ -61,4 +67,55 @@ public class FlurryStart : MonoBehaviour
 
         Flurry.EndTimedEvent("Unity Event Params Timed");
     }
+
+    public class MyMessagingListener : Flurry.IFlurryMessagingListener
+    {
+
+        public bool OnNotificationReceived(Flurry.FlurryMessage message)
+        {
+            Debug.Log("Flurry Messaging Notification Received: "
+                + message.Title + ", " + message.Body + ", " + message.ClickAction
+                + PrintData<string, string>(message.Data));
+            return false;
+        }
+
+        public bool OnNotificationClicked(Flurry.FlurryMessage message)
+        {
+            Debug.Log("Flurry Messaging Notification Clicked: "
+                + message.Title + ", " + message.Body + ", " + message.ClickAction
+                + PrintData<string, string>(message.Data));
+            return false;
+        }
+
+        public void OnNotificationCancelled(Flurry.FlurryMessage message)
+        {
+            Debug.Log("Flurry Messaging Notification Cancelled: "
+                + message.Title + ", " + message.Body + ", " + message.ClickAction
+                + PrintData<string, string>(message.Data));
+        }
+
+        public void OnTokenRefresh(string token)
+        {
+            Debug.Log("Flurry Messaging Token Refresh: " + token);
+        }
+
+        public void OnNonFlurryNotificationReceived(IDisposable nonFlurryMessage)
+        {
+            Debug.Log("Flurry Messaging Non-Flurry Notification.");
+        }
+
+        private string PrintData<TKey, TValue>(IDictionary<TKey, TValue> data)
+        {
+            string list = "";
+            if (data != null)
+            {
+                foreach (KeyValuePair<TKey, TValue> pair in data)
+                {
+                    list += "\n    {" + pair.Key + ", " + pair.Value + "}";
+                }
+            }
+            return list;
+        }
+    }
+
 }

@@ -16,8 +16,56 @@
 
 #import "FlurryUnityPlugin.h"
 #import "Flurry.h"
+#import "FlurryMessaging.h"
 
 @implementation FlurryUnityPlugin
+
+static FlurryUnityPlugin *_sharedInstance;
+
++ (FlurryUnityPlugin*) shared
+{
+    static dispatch_once_t once;
+    static id _sharedInstance;
+    dispatch_once(&once, ^{
+        NSLog(@"Creating FlurryUnityPlugin shared instance");
+        _sharedInstance = [[FlurryUnityPlugin alloc] init];
+    });
+    return _sharedInstance;
+}
+
+-(id)init {
+    self = [super init];
+    return self;
+}
+
+- (void) flurrySessionDidCreateWithInfo:  (NSDictionary *)  info
+{
+    NSLog(@"Flurry session started");
+    
+    NSString* originName = @"unity-flurry-sdk";
+    NSString* originVersion = @"1.1.0_push";
+    
+    [Flurry addOrigin:originName withVersion:originVersion];
+    
+    //For use in testing Flurry push
+    //NSString *idfv = UIDevice.currentDevice.identifierForVendor.UUIDString;
+    //NSLog(@"IDFV = %@", idfv);
+    
+};
+
+-(void) didReceiveMessage:(nonnull FlurryMessage*)message {
+    NSLog(@"didReceiveMessage = %@", [message description]);
+    //App specific implementation
+    
+}
+
+// delegate method when a notification action is performed
+-(void) didReceiveActionWithIdentifier:(nullable NSString*)identifier message:(nonnull FlurryMessage*)message {
+    NSLog(@"didReceiveAction %@ , Message = %@",identifier, [message description]);
+    //Any app specific logic goes here.
+    //Ex: Deeplink logic. See Flurry Push sample App (loading of viewControllers (nibs or storboards))
+    
+}
 
 NSString* strToNSStr(const char* str)
 {
@@ -63,6 +111,9 @@ extern "C" {
     
     const void initializeFlurrySessionBuilder() {
         builder = [FlurrySessionBuilder new];
+        
+        FlurryUnityPlugin* sharedInstance = [FlurryUnityPlugin shared];
+        [Flurry setDelegate: (id <FlurryDelegate>)  sharedInstance];
     }
     
     const void flurryWithCrashReporting(bool crashReporting){
@@ -109,6 +160,13 @@ extern "C" {
         NSString *apiKeyStr = strToNSStr(apiKey);
         
         [Flurry startSession:apiKeyStr withSessionBuilder:builder];
+    }
+    
+    const void flurrySetupMessagingWithAutoIntegration() {
+        
+        [FlurryMessaging setAutoIntegrationForMessaging];
+        FlurryUnityPlugin* sharedInstance = [FlurryUnityPlugin shared];
+        [FlurryMessaging setMessagingDelegate: (id <FlurryMessagingDelegate>)  sharedInstance];
     }
     
     const int flurryLogEvent(const char *eventName){

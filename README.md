@@ -2,6 +2,8 @@
 
 A Unity plugin for Flurry SDK
 
+Beta - **Flurry Push** for messaging is now supported by our plugin!
+
 ## Table of contents
 - [Installation](#installation)
   - [Android](#android)
@@ -13,7 +15,7 @@ A Unity plugin for Flurry SDK
 
 ## Installation
 
-1. Download the Flurry Unity package from [flurry-sdk-1.1.0.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-1.1.0.unitypackage).
+1. Download the Flurry Unity package from [flurry-sdk-1.1.0_push.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/push/flurry-sdk-1.1.0_push.unitypackage).
 2. Open your project in Unity Editor, choose menu **Assets** > **Import Package** > **Custom Package…** to bring up the File chooser, and select the package downloaded.
 3. Add Flurry code
    
@@ -23,12 +25,30 @@ A Unity plugin for Flurry SDK
 
 ### Android
 
-To improve analytics identities, please see [Manual Flurry Android SDK Integration](https://developer.yahoo.com/flurry/docs/integrateflurry/android-manual/) for adding Google Play Services library in your app by including `play-services-base` and `play-services-ads` libraries.
+- To improve analytics identities, please see [Manual Flurry Android SDK Integration](https://developer.yahoo.com/flurry/docs/integrateflurry/android-manual/) for adding Google Play Services library in your app by including `play-services-base` and `play-services-ads` libraries.
+- **Flurry Push**</br>
+  In order to use [Flurry Push](https://developer.yahoo.com/flurry/docs/push/) for [Android](https://developer.yahoo.com/flurry/docs/push/integration/android/), please follow the additional steps below:
+  1. Follow [Set up a Firebase Cloud Messaging client app with Unity](https://firebase.google.com/docs/cloud-messaging/unity/client). Complete to the 5th step for importing Firebase SDK. There should be a file `google-services.json` in your project's `Android` folder now. You do not need to provide any setup codes here.
+  2. Configure an Android entry point Application. Please rename the following Android manifest template file `Assets/Plugins/Android/AndroidManifest_Flurry-template.xml` that comes with the Flurry SDK plugin to `AndroidManifest.xml`, and merge the contents with yours if needed.
+  3. Update the metadata section in your `AndroidManifest.xml`.
+  
+     ```
+      <!-- Flurry Agent settings; please update -->
+      <meta-data android:name="flurry_apikey" android:value="FLURRY_ANDROID_API_KEY" />
+      <meta-data android:name="flurry_with_crash_reporting" android:value="true" />
+      <meta-data android:name="flurry_with_continue_session_millis" android:value="10000L" />
+      <meta-data android:name="flurry_with_include_background_sessions_in_metrics" android:value="true" />
+      <meta-data android:name="flurry_with_log_enabled" android:value="true" />
+      <meta-data android:name="flurry_with_log_level" android:value="2" />
+      <meta-data android:name="flurry_with_messaging" android:value="true" />
+     ```
 
 ### iOS
 
-There are some minor differences between the Android and iOS plugin:
+For further details on configuring xcode for push notifications see here: https://developer.yahoo.com/flurry/docs/push/integration/unityios/
 
+There are some minor differences between the Android and iOS plugin:
+- iOS does not make use of the messaging listeners in C-sharp. Delegate methods didReceiveMessage/didReceiveActionWithIdentifier in FlurryUnityPlug.mm may be optionally modified to customize app behavior.
 - iOS does not have an equivalent method for Android's GetReleaseVersion method.
 - iOS does not yet have an equivalent method for Android's LogPayment method, however if SetIAPReportingEnabled is set to true Flurry will automatically track in app purchases.
 
@@ -53,11 +73,13 @@ public class FlurryStart : MonoBehaviour
 
     void Start()
     {
+        // Note: When enabling Messaging, Flurry Android should be initialized by using AndroidManifest.xml.
         // Initialize Flurry once.
         new Flurry.Builder()
                   .WithCrashReporting(true)
                   .WithLogEnabled(true)
                   .WithLogLevel(Flurry.LogLevel.LogVERBOSE)
+                  .withMessaging(true);
                   .Build(FLURRY_API_KEY);
 
         // Example to get Flurry versions.
@@ -69,6 +91,9 @@ public class FlurryStart : MonoBehaviour
         Flurry.SetGender(Flurry.Gender.Female);
         Flurry.SetReportLocation(true);
 
+        // Set Messaging listener
+        Flurry.SetMessagingListener(new MyMessagingListener());
+        
         // Log Flurry events.
         Flurry.EventRecordStatus status = Flurry.LogEvent("Unity Event");
         Debug.Log("Log Unity Event status: " + status);
@@ -82,7 +107,40 @@ public class FlurryStart : MonoBehaviour
         ...
         Flurry.EndTimedEvent("Unity Event Params Timed");
     }
-    ...
+    
+    public class MyMessagingListener : Flurry.IFlurryMessagingListener
+    {
+        // If you would like to handle the notification yourself, return true to notify Flurry
+        // you've handled it, and Flurry will not show the notification.
+        public bool OnNotificationReceived(Flurry.FlurryMessage message)
+        {
+            Debug.Log("Flurry Messaging Notification Received: " + message.Title);
+            return false;
+        }
+
+        // If you would like to handle the notification yourself, return true to notify Flurry
+        // you've handled it, and Flurry will not launch the app or "click_action" activity.
+        public bool OnNotificationClicked(Flurry.FlurryMessage message)
+        {
+            Debug.Log("Flurry Messaging Notification Clicked: " + message.Title);
+            return false;
+        }
+
+        public void OnNotificationCancelled(Flurry.FlurryMessage message)
+        {
+            Debug.Log("Flurry Messaging Notification Cancelled: " + message.Title);
+        }
+
+        public void OnTokenRefresh(string token)
+        {
+            Debug.Log("Flurry Messaging Token Refresh: " + token);
+        }
+
+        public void OnNonFlurryNotificationReceived(IDisposable nonFlurryMessage)
+        {
+            Debug.Log("Flurry Messaging Non-Flurry Notification.");
+        }
+    }
 }
 ```
 
@@ -100,6 +158,7 @@ See [Android](http://flurry.github.io/flurry-android-sdk/)-[(FlurryAgent)](http:
   Flurry.Builder WithIncludeBackgroundSessionsInMetrics(bool includeBackgroundSessionsInMetrics);
   Flurry.Builder WithLogEnabled(bool enableLog);
   Flurry.Builder WithLogLevel(FlurrySDK.Flurry.LogLevel logLevel);
+  Flurry.Builder.withMessaging(bool enableMessaging);
   ```
 - **Methods to set users preferences**
   
@@ -147,6 +206,28 @@ See [Android](http://flurry.github.io/flurry-android-sdk/)-[(FlurryAgent)](http:
   
   ```c
   void SetIAPReportingEnabled(bool enableIAP);
+  ```
+- **Methods for Messaging (Flurry Push)**
+
+  ```c
+  void SetMessagingListener(IFlurryMessagingListener flurryMessagingListener);
+
+  interface IFlurryMessagingListener
+  {
+      bool OnNotificationReceived(FlurryMessage message);
+      bool OnNotificationClicked(FlurryMessage message);
+      void OnNotificationCancelled(FlurryMessage message);
+      void OnTokenRefresh(string token);
+      void OnNonFlurryNotificationReceived(IDisposable nonFlurryMessage);
+  }
+
+  class FlurryMessage
+  {
+      string Title;
+      string Body;
+      string ClickAction;
+      IDictionary<string, string> Data;
+  }
   ```
   
 ## Support
