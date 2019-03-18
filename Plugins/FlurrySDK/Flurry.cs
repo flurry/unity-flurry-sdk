@@ -45,6 +45,8 @@ namespace FlurrySDK
             {
                 flurryAgent = new FlurryAgentIOS();
             }
+#else
+            flurryAgent = null;
 #endif
         }
 
@@ -167,6 +169,8 @@ namespace FlurrySDK
                 {
                     builder = new FlurryAgentIOS.AgentBuilderIOS();
                 }
+#else
+                builder = null;
 #endif
             }
 

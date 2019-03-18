@@ -38,6 +38,15 @@ static FlurryUnityPlugin *_sharedInstance;
     return self;
 }
 
+- (void) setupFlurryAutoMessaging {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        [FlurryMessaging setAutoIntegrationForMessaging];
+        FlurryUnityPlugin* sharedInstance = [FlurryUnityPlugin shared];
+        [FlurryMessaging setMessagingDelegate: (id <FlurryMessagingDelegate>)  sharedInstance];
+    });
+}
+
 - (void) flurrySessionDidCreateWithInfo:  (NSDictionary *)  info
 {
     NSLog(@"Flurry session started");
@@ -111,7 +120,6 @@ extern "C" {
     
     const void initializeFlurrySessionBuilder() {
         builder = [FlurrySessionBuilder new];
-        
         FlurryUnityPlugin* sharedInstance = [FlurryUnityPlugin shared];
         [Flurry setDelegate: (id <FlurryDelegate>)  sharedInstance];
     }
@@ -158,15 +166,14 @@ extern "C" {
     
     const void flurryStartSessionWithSessionBuilder(const char *apiKey){
         NSString *apiKeyStr = strToNSStr(apiKey);
-        
-        [Flurry startSession:apiKeyStr withSessionBuilder:builder];
+        if (![Flurry activeSessionExists]) {
+            [Flurry startSession:apiKeyStr withSessionBuilder:builder];
+        }
     }
     
     const void flurrySetupMessagingWithAutoIntegration() {
-        
-        [FlurryMessaging setAutoIntegrationForMessaging];
         FlurryUnityPlugin* sharedInstance = [FlurryUnityPlugin shared];
-        [FlurryMessaging setMessagingDelegate: (id <FlurryMessagingDelegate>)  sharedInstance];
+        [sharedInstance setupFlurryAutoMessaging];
     }
     
     const int flurryLogEvent(const char *eventName){

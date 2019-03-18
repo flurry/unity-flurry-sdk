@@ -20,6 +20,6 @@
 @interface FlurryUnityPlugin : NSObject
 
 + (FlurryUnityPlugin*) shared;
-
+- (void) setupFlurryAutoMessaging;
 
 @end
