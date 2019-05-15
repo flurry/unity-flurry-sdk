@@ -34,59 +34,62 @@ namespace FlurrySDKInternal
             public abstract void WithLogEnabled(bool enableLog);
 
             public abstract void WithLogLevel(FlurrySDK.Flurry.LogLevel logLevel);
+
+            public abstract void WithMessaging(bool enableMessaging);
         }
 
-        abstract public void SetAge(int age);
+        public abstract void SetAge(int age);
 
-        abstract public void SetGender(FlurrySDK.Flurry.Gender gender);
+        public abstract void SetGender(FlurrySDK.Flurry.Gender gender);
 
-        abstract public void SetReportLocation(bool reportLocation);
+        public abstract void SetReportLocation(bool reportLocation);
 
-        abstract public void SetSessionOrigin(string originName, string deepLink);
+        public abstract void SetSessionOrigin(string originName, string deepLink);
 
-        abstract public void SetUserId(string userId);
+        public abstract void SetUserId(string userId);
 
-        abstract public void SetVersionName(string versionName);
+        public abstract void SetVersionName(string versionName);
 
-        abstract public void AddOrigin(string originName, string originVersion);
+        public abstract void AddOrigin(string originName, string originVersion);
 
-        abstract public void AddOrigin(string originName, string originVersion, IDictionary<string, string> originParameters);
+        public abstract void AddOrigin(string originName, string originVersion, IDictionary<string, string> originParameters);
 
-        abstract public void AddSessionProperty(string name, string value);
+        public abstract void AddSessionProperty(string name, string value);
 
-        abstract public int GetAgentVersion();
+        public abstract void SetMessagingListener(FlurrySDK.Flurry.IFlurryMessagingListener flurryMessagingListener);
 
-        abstract public string GetReleaseVersion();
+        public abstract int GetAgentVersion();
 
-        abstract public string GetSessionId();
+        public abstract string GetReleaseVersion();
 
-        abstract public int LogEvent(string eventId);
+        public abstract string GetSessionId();
 
-        abstract public int LogEvent(string eventId, bool timed);
+        public abstract int LogEvent(string eventId);
 
-        abstract public int LogEvent(string eventId, IDictionary<string, string> parameters);
+        public abstract int LogEvent(string eventId, bool timed);
 
-        abstract public int LogEvent(string eventId, IDictionary<string, string> parameters, bool timed);
+        public abstract int LogEvent(string eventId, IDictionary<string, string> parameters);
 
-        abstract public void EndTimedEvent(string eventId);
+        public abstract int LogEvent(string eventId, IDictionary<string, string> parameters, bool timed);
 
-        abstract public void EndTimedEvent(string eventId, IDictionary<string, string> parameters);
+        public abstract void EndTimedEvent(string eventId);
 
-        abstract public void OnPageView();
+        public abstract void EndTimedEvent(string eventId, IDictionary<string, string> parameters);
 
-        abstract public void OnError(string errorId, string message, string errorClass);
+        public abstract void OnPageView();
 
-        abstract public void OnError(string errorId, string message, string errorClass, IDictionary<string, string> parameters);
+        public abstract void OnError(string errorId, string message, string errorClass);
 
-        abstract public void LogBreadcrumb(string crashBreadcrumb);
+        public abstract void OnError(string errorId, string message, string errorClass, IDictionary<string, string> parameters);
 
-        abstract public int LogPayment(string productName, string productId, int quantity, double price,
+        public abstract void LogBreadcrumb(string crashBreadcrumb);
+
+        public abstract int LogPayment(string productName, string productId, int quantity, double price,
                                        string currency, string transactionId, IDictionary<string, string> parameters);
 
-        abstract public void SetIAPReportingEnabled(bool enableIAP);
+        public abstract void SetIAPReportingEnabled(bool enableIAP);
 
-
-        abstract public void Dispose();
+        public abstract void Dispose();
 
     };
 }

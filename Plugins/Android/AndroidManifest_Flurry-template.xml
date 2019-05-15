@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.flurry.unityplugin"
+    android:versionCode="1"
+    android:versionName="1.0">
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <application
+        android:name="com.flurry.android.FlurryUnityApplication"
+        android:label="@string/app_name"
+        android:icon="@drawable/app_icon">
+        
+        <!-- Flurry Agent settings; please update -->
+        <meta-data android:name="flurry_apikey" android:value="FLURRY_ANDROID_API_KEY" />
+        <meta-data android:name="flurry_with_crash_reporting" android:value="true" />
+        <meta-data android:name="flurry_with_continue_session_millis" android:value="10000L" />
+        <meta-data android:name="flurry_with_include_background_sessions_in_metrics" android:value="true" />
+        <meta-data android:name="flurry_with_log_enabled" android:value="true" />
+        <meta-data android:name="flurry_with_log_level" android:value="2" />
+        <meta-data android:name="flurry_with_messaging" android:value="true" />
+        
+        <!-- Unity Player Activity; replace with yours if needed -->
+        <activity
+            android:name="com.unity3d.player.UnityPlayerActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="fullSensor"
+            android:launchMode="singleTask"
+            android:hardwareAccelerated="false"
+            android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale|layoutDirection|density">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+            <meta-data android:name="unityplayer.UnityActivity" android:value="true" />
+        </activity>
+
+        <!-- Flurry Messaging services; do not modify -->
+        <service android:name="com.flurry.android.marketing.messaging.FCM.FlurryMessageListenerService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <service android:name="com.flurry.android.marketing.messaging.FCM.FlurryInstanceIDListenerService">
+            <intent-filter>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
+            </intent-filter>
+        </service>
+
+        <receiver
+            android:name="com.flurry.android.marketing.messaging.notification.NotificationCancelledReceiver"
+            android:enabled="true"
+            android:exported="false">
+        </receiver>
+
+        <receiver
+            android:name="com.flurry.android.marketing.messaging.notification.NotificationClickedReceiver"
+            android:enabled="true"
+            android:exported="false">
+        </receiver>
+
+    </application>
+    
+</manifest>

@@ -53,7 +53,7 @@ public class FlurryStart : MonoBehaviour
         Debug.Log("Log Unity Event status: " + status);
 
         // Log Flurry timed events with parameters.
-        Dictionary<string, string> parameters = new Dictionary<string, string>();
+        IDictionary<string, string> parameters = new Dictionary<string, string>();
         parameters.Add("Author", "Flurry");
         parameters.Add("Status", "Registered");
         status = Flurry.LogEvent("Unity Event Params Timed", parameters, true);

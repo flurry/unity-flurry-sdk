@@ -25,9 +25,6 @@ namespace FlurrySDKInternal
 {
     public class FlurryAgentIOS : FlurryAgent
     {
-        private static readonly string ORIGIN_NAME = "unity-flurry-sdk";
-        private static readonly string ORIGIN_VERSION = "1.1.0";
-
         public FlurryAgentIOS()
         {
             Debug.Log("FlurryAgentIOS instance created");
@@ -53,6 +50,9 @@ namespace FlurrySDKInternal
 
         [DllImport("__Internal")]
         private static extern void flurryWithIncludeBackgroundSessionsInMetrics(bool includeBackgroundSessionsInMetrics);
+
+        [DllImport("__Internal")]
+        private static extern void flurrySetupMessagingWithAutoIntegration();
 
         [DllImport("__Internal")]
         private static extern void flurryStartSessionWithSessionBuilder(string apiKey);
@@ -127,14 +127,11 @@ namespace FlurrySDKInternal
         {
             public AgentBuilderIOS()
             {
-                //initialize FlurrySessionBuilder
                 initializeFlurrySessionBuilder();
-                flurryAddOrigin(ORIGIN_NAME, ORIGIN_VERSION);
             }
 
             public override void Build(string apiKey)
             {
-                Debug.Log("startSessionWithSessionBuilder");
                 flurryStartSessionWithSessionBuilder(apiKey);
             }
 
@@ -168,6 +165,19 @@ namespace FlurrySDKInternal
             {
                 flurryWithAppVersion(appVersion);
             }
+
+            public override void WithMessaging(bool enableMessaging)
+            {
+                if (enableMessaging)
+                {
+                    flurrySetupMessagingWithAutoIntegration();
+                }
+            }
+        }
+
+        public override void SetMessagingListener(FlurrySDK.Flurry.IFlurryMessagingListener flurryMessagingListener)
+        {
+            Debug.Log("iOS does not make use of the flurryMessagingListener. This is handled by delegate methods didReceiveMessage and didReceiveActionWithIdentifier in FlurryUnityPlugin.mm");
         }
 
         public override void SetAge(int age)

@@ -1,5 +1,11 @@
 # Change Log
 
+## v1.5.0 (2019-05-16)
+
+#### Features
+
+* Support Flurry Push for messaging features
+
 ## v1.1.0 (2019-01-30)
 
 #### Features

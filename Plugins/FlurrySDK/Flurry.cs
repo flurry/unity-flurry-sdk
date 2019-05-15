@@ -45,6 +45,8 @@ namespace FlurrySDK
             {
                 flurryAgent = new FlurryAgentIOS();
             }
+#else
+            flurryAgent = null;
 #endif
         }
 
@@ -87,6 +89,68 @@ namespace FlurrySDK
         }
 
         /// <summary>
+        /// Flurry message.
+        /// </summary>
+        public class FlurryMessage
+        {
+            public string Title;
+            public string Body;
+            public string ClickAction;
+            public IDictionary<string, string> Data;
+        }
+
+        /// <summary>
+        /// If listener is set, Flurry will call this method to notify you a notification has been received.
+        /// </summary>
+        public interface IFlurryMessagingListener
+        {
+            /// <summary>
+            /// If listener is set, Flurry will call this method to notify you
+            /// a notification has been received. If you would like to handle
+            /// the notification yourself, be sure to return true to notify
+            /// Flurry you've handled it. If you return false, Flurry will continue with
+            /// default behavior, which is show the notification if app is in background,
+            /// and do nothing if app is in foreground.
+            /// </summary>
+            /// <returns><c>true</c>, if you've handled the notification. <c>false</c> if you haven't and want Flurry to handle it.</returns>
+            /// <param name="message">Message.</param>
+            bool OnNotificationReceived(FlurryMessage message);
+
+            /// <summary>
+            /// If listener is set, Flurry will call this method to notify you
+            /// a notification has been clicked. If you would like to handle
+            /// the UI navigation yourself, be sure to return true to notify
+            /// Flurry you've handled it.  If you return false, Flurry will continue with
+            /// default behavior, which is launch the app or "click_action" activity.
+            /// </summary>
+            /// <returns><c>true</c>, if you've handled the notification. <c>false</c> if you haven't and want Flurry to handle it.</returns>
+            /// <param name="message">Message.</param>
+            bool OnNotificationClicked(FlurryMessage message);
+
+            /// <summary>
+            /// If listener is set, Flurry will notify you if user has cancelled/dismissed the notification.
+            /// </summary>
+            /// <returns><c>true</c>, if you've handled the notification. <c>false</c> if you haven't and want Flurry to handle it.</returns>
+            /// <param name="message">Message.</param>
+            void OnNotificationCancelled(FlurryMessage message);
+
+            /// <summary>
+            /// If listener is set, Flurry will notify you if push notification token has been changed.
+            /// </summary>
+            /// <param name="token">Token.</param>
+            void OnTokenRefresh(string token);
+
+            /// <summary>
+            /// If listener is set, Flurry will notify you when a notification
+            /// has been received that was not sent from Flurry. Based on the various
+            /// push providers you have integrated, you may cast the Object to the appropriate type.
+            /// </summary>
+            /// <param name="nonFlurryMessage">Non flurry message.</param>
+            void OnNonFlurryNotificationReceived(IDisposable nonFlurryMessage);
+
+        }
+
+        /// <summary>
         /// Builder Pattern class for Flurry
         /// </summary>
         public class Builder
@@ -105,6 +169,8 @@ namespace FlurrySDK
                 {
                     builder = new FlurryAgentIOS.AgentBuilderIOS();
                 }
+#else
+                builder = null;
 #endif
             }
 
@@ -185,6 +251,21 @@ namespace FlurrySDK
                 }
                 return this;
             }
+
+            /// <summary>
+            /// Enable Flurry add-on Messaging.
+            /// </summary>
+            /// <returns>The builder.</returns>
+            /// <param name="enableMessaging">If set to <c>true</c> to enable messaging.</param>
+            public Builder WithMessaging(bool enableMessaging = true)
+            {
+                if (builder != null)
+                {
+                    builder.WithMessaging(enableMessaging);
+                }
+                return this;
+            }
+
         }
 
         /// <summary>
@@ -297,6 +378,18 @@ namespace FlurrySDK
             if (flurryAgent != null)
             {
                 flurryAgent.AddSessionProperty(name, value);
+            }
+        }
+
+        /// <summary>
+        /// Set a listener to listen notification events.
+        /// </summary>
+        /// <param name="flurryMessagingListener">Flurry messaging listener.</param>
+        public static void SetMessagingListener(IFlurryMessagingListener flurryMessagingListener)
+        {
+            if (flurryAgent != null)
+            {
+                flurryAgent.SetMessagingListener(flurryMessagingListener);
             }
         }
 
