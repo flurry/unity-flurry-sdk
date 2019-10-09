@@ -25,6 +25,8 @@ namespace FlurrySDKInternal
         {
             public abstract void Build(string apiKey);
 
+            public abstract void WithAppVersion(string appVersion);
+
             public abstract void WithCrashReporting(bool crashReporting);
 
             public abstract void WithContinueSessionMillis(long sessionMillis);

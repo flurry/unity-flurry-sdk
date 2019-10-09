@@ -57,12 +57,30 @@ namespace FlurrySDK
         /// </summary>
         public enum LogLevel
         {
-            LogVERBOSE = 2,
-            LogDEBUG   = 3,
-            LogINFO    = 4,
-            LogWARN    = 5,
-            LogERROR   = 6,
-            LogASSERT  = 7
+            VERBOSE = 2,
+            DEBUG   = 3,
+            INFO    = 4,
+            WARN    = 5,
+            ERROR   = 6,
+            ASSERT  = 7,
+
+            [Obsolete("please use LogLevel.VERBOSE instead of LogLevel.LogVERBOSE")]
+            LogVERBOSE = VERBOSE,
+
+            [Obsolete("please use LogLevel.DEBUG instead of LogLevel.LogDEBUG")]
+            LogDEBUG = DEBUG,
+
+            [Obsolete("please use LogLevel.INFO instead of LogLevel.LogINFO")]
+            LogINFO = INFO,
+
+            [Obsolete("please use LogLevel.WARN instead of LogLevel.LogWARN")]
+            LogWARN = WARN,
+
+            [Obsolete("please use LogLevel.ERROR instead of LogLevel.LogERROR")]
+            LogERROR = ERROR,
+
+            [Obsolete("please use LogLevel.ASSERT instead of LogLevel.LogASSERT")]
+            LogASSERT = ASSERT
         }
 
         /// <summary>
@@ -243,7 +261,7 @@ namespace FlurrySDK
             /// </summary>
             /// <returns>The builder.</returns>
             /// <param name="logLevel">Log level.</param>
-            public Builder WithLogLevel(LogLevel logLevel = LogLevel.LogWARN)
+            public Builder WithLogLevel(LogLevel logLevel = LogLevel.WARN)
             {
                 if (builder != null)
                 {
@@ -262,6 +280,20 @@ namespace FlurrySDK
                 if (builder != null)
                 {
                     builder.WithMessaging(enableMessaging);
+                }
+                return this;
+            }
+
+            /// <summary>
+            /// Sets the app version.
+            /// </summary>
+            /// <returns>The builder.</returns>
+            /// <param name="appVersion">App version name string</param>
+            public Builder WithAppVersion(string appVersion)
+            {
+                if (builder != null)
+                {
+                    builder.WithAppVersion(appVersion);
                 }
                 return this;
             }
@@ -526,7 +558,7 @@ namespace FlurrySDK
         }
 
         /// <summary>
-        /// Log a page view.
+        /// Log a page view. Deprecated, API removed, no longer supported by Flurry.
         /// </summary>
         public static void OnPageView()
         {

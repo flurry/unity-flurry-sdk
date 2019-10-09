@@ -52,7 +52,7 @@ static FlurryUnityPlugin *_sharedInstance;
     NSLog(@"Flurry session started");
     
     NSString* originName = @"unity-flurry-sdk";
-    NSString* originVersion = @"1.5.0";
+    NSString* originVersion = @"2.0.0";
     
     [Flurry addOrigin:originName withVersion:originVersion];
     
@@ -234,8 +234,7 @@ extern "C" {
     }
     
     const void flurrySetVersionName(const char* versionName) {
-        NSString *versionNameStr = strToNSStr(versionName);
-        [Flurry setAppVersion:versionNameStr];
+        NSLog(@"SetVersionName is removed from the Flurry SDK. Use WithAppVersion in the session builder instead.");
     }
     
     const void flurryAddSessionProperty(const char* name, const char* value) {

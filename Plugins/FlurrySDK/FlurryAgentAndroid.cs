@@ -27,7 +27,7 @@ namespace FlurrySDKInternal
         public static NetworkReachability internetReachability = Application.internetReachability;
 
         private static readonly string ORIGIN_NAME = "unity-flurry-sdk";
-        private static readonly string ORIGIN_VERSION = "1.5.0";
+        private static readonly string ORIGIN_VERSION = "2.0.0";
 
         private static AndroidJavaClass cls_FlurryAgent = new AndroidJavaClass("com.flurry.android.FlurryAgent");
         private static AndroidJavaClass cls_FlurryAgentConstants = new AndroidJavaClass("com.flurry.android.Constants");
@@ -47,6 +47,11 @@ namespace FlurrySDKInternal
                         obj_FlurryAgentBuilder.Call("build", obj_Activity, apiKey);
                     }
                 }
+            }
+
+            public override void WithAppVersion(string appVersion)
+            {
+                Debug.Log("iOS only. For Android, please also call Flurry.setVersionName().");
             }
 
             public override void WithCrashReporting(bool crashReporting)
@@ -243,7 +248,10 @@ namespace FlurrySDKInternal
 
         public override void OnPageView()
         {
-            cls_FlurryAgent.CallStatic("onPageView");
+            Debug.Log("Deprecated API OnPageView removed.");
+
+            // Deprecated API removed
+            // cls_FlurryAgent.CallStatic("onPageView");
         }
 
         public override void OnError(string errorId, string message, string errorClass)

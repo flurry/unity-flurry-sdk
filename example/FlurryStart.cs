@@ -37,6 +37,7 @@ public class FlurryStart : MonoBehaviour
                   .WithCrashReporting(true)
                   .WithLogEnabled(true)
                   .WithLogLevel(Flurry.LogLevel.LogVERBOSE)
+                  .WithAppVersion("1.0")
                   .Build(FLURRY_API_KEY);
 
         // Example to get Flurry versions.

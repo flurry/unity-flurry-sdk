@@ -1,5 +1,15 @@
 # Change Log
 
+# v2.0.0 (2019-10-08)
+
+#### Features
+
+* Upgrade Flurry Android SDK version to 12.0.0
+* Upgrade Flurry iOS SDK version to 10.0.2
+* Mark onPageView API as deprecated
+* Add Flurry.Builder.WithAppVersion for iOS
+* Bundle FlurryUnityApplication.java in aar instead of raw format
+
 ## v1.5.0 (2019-05-16)
 
 #### Features

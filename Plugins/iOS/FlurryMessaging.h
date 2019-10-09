@@ -161,7 +161,7 @@ typedef void(^MessagingHandler)(void);
  * @endcode
  *
  */
-#if TARGET_OS_IPHONE
+#if !TARGET_OS_TV
 +(void) receivedNotificationResponse:(nonnull UNNotificationResponse *)response withCompletionHandler:(_Nullable MessagingHandler) completionHandler API_AVAILABLE(ios(10.0));
 #endif
 /*!

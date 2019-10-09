@@ -161,7 +161,7 @@ namespace FlurrySDKInternal
                 flurryWithLogLevel((int)logLevel);
             }
 
-            public void WithAppVersion(string appVersion)
+            public override void WithAppVersion(string appVersion)
             {
                 flurryWithAppVersion(appVersion);
             }
@@ -212,9 +212,9 @@ namespace FlurrySDKInternal
            flurrySetUserId(userId);
         }
 
-        public override void SetVersionName(string versionName) 
+        public override void SetVersionName(string versionName)
         {
-            flurrySetVersionName(versionName);
+            Debug.Log("Android only. For iOS, please also call Flurry.Builder.WithAppVersion().");
         }
 
         public override void AddOrigin(string originName, string originVersion)
@@ -235,7 +235,7 @@ namespace FlurrySDKInternal
         }
 
         public override int GetAgentVersion()
-        { 
+        {
             string agentVersionStr = flurryGetAgentVersion();
             int agentVersion = 0;
 
@@ -244,13 +244,13 @@ namespace FlurrySDKInternal
         }
 
         public override string GetReleaseVersion()
-        { 
+        {
             Debug.Log("Flurry iOS SDK does not implement getReleaseVersion method.");
-            return "1.0"; 
+            return "1.0";
         }
 
         public override string GetSessionId()
-        { 
+        {
             return flurryGetSessionId();
         }
 
@@ -268,12 +268,12 @@ namespace FlurrySDKInternal
         }
 
         public override int LogEvent(string eventId, bool timed)
-        { 
+        {
             return (int) flurryLogTimedEvent(eventId, timed);
         }
 
         public override int LogEvent(string eventId, IDictionary<string, string> parameters, bool timed)
-        { 
+        {
             string keys, values;
             ToKeyValue(parameters, out keys, out values);
             return (int) flurryLogTimedEventWithParams(eventId, keys, values, timed);
@@ -315,9 +315,9 @@ namespace FlurrySDKInternal
 
         public override int LogPayment(string productName, string productId, int quantity, double price,
                                        string currency, string transactionId, IDictionary<string, string> parameters)
-        { 
+        {
             Debug.Log("Flurry iOS SDK does not implement LogPayment method.");
-            return 1; 
+            return 1;
         }
 
         public override void SetIAPReportingEnabled(bool enableIAP)
