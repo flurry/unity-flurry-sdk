@@ -16,7 +16,7 @@ A Unity plugin for Flurry SDK
 
 ## Installation
 
-1. Download the Flurry Unity package from [flurry-sdk-2.0.0.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-2.0.0.unitypackage).
+1. Download the Flurry Unity package from [flurry-sdk-2.1.0.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-2.1.0.unitypackage).
 2. Open your project in Unity Editor, choose menu **Assets** > **Import Package** > **Custom Package…** to bring up the File chooser, and select the package downloaded.
 3. Add Flurry code
 
@@ -89,7 +89,7 @@ public class FlurryStart : MonoBehaviour
                   .WithCrashReporting(true)
                   .WithLogEnabled(true)
                   .WithLogLevel(Flurry.LogLevel.VERBOSE)
-                  .withMessaging(true);
+                  .WithMessaging(true);
                   .Build(FLURRY_API_KEY);
 
         // Example to get Flurry versions.
@@ -169,7 +169,7 @@ See [Android](http://flurry.github.io/flurry-android-sdk/)-[(FlurryAgent)](http:
   Flurry.Builder WithIncludeBackgroundSessionsInMetrics(bool includeBackgroundSessionsInMetrics);
   Flurry.Builder WithLogEnabled(bool enableLog);
   Flurry.Builder WithLogLevel(FlurrySDK.Flurry.LogLevel logLevel); // LogLevel = { VERBOSE, DEBUG, INFO, WARN, ERROR, ASSERT }
-  Flurry.Builder.withMessaging(bool enableMessaging);
+  Flurry.Builder WithMessaging(bool enableMessaging);
   ```
 
 - **Methods to set users preferences**

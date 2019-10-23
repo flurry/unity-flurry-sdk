@@ -52,7 +52,7 @@ static FlurryUnityPlugin *_sharedInstance;
     NSLog(@"Flurry session started");
     
     NSString* originName = @"unity-flurry-sdk";
-    NSString* originVersion = @"2.0.0";
+    NSString* originVersion = @"2.1.0";
     
     [Flurry addOrigin:originName withVersion:originVersion];
     

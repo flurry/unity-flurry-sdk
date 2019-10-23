@@ -1,5 +1,11 @@
 # Change Log
 
+## v2.1.0 (2019-10-23)
+
+#### Features
+
+* Upgrade Flurry Android SDK version to 12.0.1
+
 # v2.0.0 (2019-10-08)
 
 #### Features
