@@ -37,6 +37,9 @@ namespace FlurrySDKInternal
         private static extern void flurryWithCrashReporting(bool crashReporting);
 
         [DllImport("__Internal")]
+        private static extern void flurryWithDataSaleOptOut(bool isOptOut);
+
+        [DllImport("__Internal")]
         private static extern void flurryWithLogLevel(int logLevel);
 
         [DllImport("__Internal")]
@@ -57,6 +60,12 @@ namespace FlurrySDKInternal
         [DllImport("__Internal")]
         private static extern void flurryStartSessionWithSessionBuilder(string apiKey);
        
+        [DllImport("__Internal")]
+        private static extern void flurrySetDataSaleOptOut(bool isOptOut);
+
+        [DllImport("__Internal")]
+        private static extern void flurrySetDelete();
+
         [DllImport("__Internal")]
         private static extern int flurryLogEvent(string eventId);
 
@@ -140,6 +149,11 @@ namespace FlurrySDKInternal
                 flurryWithCrashReporting(crashReporting);
             }
 
+            public override void WithDataSaleOptOut(bool isOptOut)
+            {
+                flurryWithDataSaleOptOut(isOptOut);
+            }
+
             public override void WithContinueSessionMillis(long sessionMillis)
             {
                 //iOS uses seconds rather than milliseconds
@@ -178,6 +192,16 @@ namespace FlurrySDKInternal
         public override void SetMessagingListener(FlurrySDK.Flurry.IFlurryMessagingListener flurryMessagingListener)
         {
             Debug.Log("iOS does not make use of the flurryMessagingListener. This is handled by delegate methods didReceiveMessage and didReceiveActionWithIdentifier in FlurryUnityPlugin.mm");
+        }
+
+        public override void SetDataSaleOptOut(bool isOptOut)
+        {
+           flurrySetDataSaleOptOut(isOptOut);
+        }
+
+        public override void DeleteData()
+        {
+            flurrySetDelete();
         }
 
         public override void SetAge(int age)

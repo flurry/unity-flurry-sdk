@@ -84,6 +84,10 @@ namespace FlurrySDKInternal
                 Debug.Log("To enable Flurry Messaging for Android, please remember to update your AndroidManifest.xml to setup the Messaging.");
             }
 
+            public override void WithDataSaleOptOut(bool isOptOut)
+            {
+                obj_FlurryAgentBuilder.Call<AndroidJavaObject>("withDataSaleOptOut", isOptOut);
+            }
         }
 
         class MessagingCallback : AndroidJavaProxy
@@ -170,6 +174,16 @@ namespace FlurrySDKInternal
         public override void SetVersionName(string versionName)
         {
             cls_FlurryAgent.CallStatic("setVersionName", versionName);
+        }
+
+        public override void SetDataSaleOptOut(bool isOptOut)
+        {
+            cls_FlurryAgent.CallStatic("setDataSaleOptOut", isOptOut);
+        }
+
+        public override void DeleteData()
+        {
+            cls_FlurryAgent.CallStatic("deleteData");
         }
 
         public override void AddOrigin(string originName, string originVersion)

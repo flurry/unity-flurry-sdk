@@ -38,8 +38,10 @@ namespace FlurrySDKInternal
             public abstract void WithLogLevel(FlurrySDK.Flurry.LogLevel logLevel);
 
             public abstract void WithMessaging(bool enableMessaging);
+            
+            public abstract void WithDataSaleOptOut(bool isOptOut);
         }
-
+        
         public abstract void SetAge(int age);
 
         public abstract void SetGender(FlurrySDK.Flurry.Gender gender);
@@ -51,6 +53,10 @@ namespace FlurrySDKInternal
         public abstract void SetUserId(string userId);
 
         public abstract void SetVersionName(string versionName);
+
+        public abstract void SetDataSaleOptOut(bool isOptOut);
+
+        public abstract void DeleteData();
 
         public abstract void AddOrigin(string originName, string originVersion);
 

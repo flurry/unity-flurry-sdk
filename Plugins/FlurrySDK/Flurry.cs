@@ -213,6 +213,20 @@ namespace FlurrySDK
                 }
                 return this;
             }
+            
+            /// <summary>
+            /// An api to send ccpa compliance data to Flurry on the user's choice to opt out or opt in to data sale to third parties. The default is false
+            /// </summary>
+            /// <returns>The builder.</returns>
+            /// <param name="isOptOut">If set to <c>true</c> user is opted out of data sale to third parties for CCPA.</param>
+            public Builder WithDataSaleOptOut(bool isOptOut)
+            {
+                if (builder != null)
+                {
+                    builder.WithDataSaleOptOut(isOptOut);
+                }
+                return this;
+            }
 
             /// <summary>
             /// Set the timeout for expiring a Flurry session.
@@ -298,6 +312,29 @@ namespace FlurrySDK
                 return this;
             }
 
+        }
+        
+        /// <summary>
+        /// An api to send ccpa compliance data to Flurry on the user's choice to opt out or opt in to data sale to third parties. The user's preference must be used to initialize the WithDataSaleOptOut setting in the FlurrySessionBuilder in all future sessions.
+        /// </summary>
+        /// <param name="isOptOut">isOptOut</param>
+        public static void SetDataSaleOptOut(bool isOptOut)
+        {
+            if (flurryAgent != null)
+            {
+                flurryAgent.SetDataSaleOptOut(isOptOut);
+            }
+        }
+        
+        /// <summary>
+        /// An api to allow the user to request Flurry delete their collected data from this app.
+        /// </summary>
+        public static void DeleteData()
+        {
+            if (flurryAgent != null)
+            {
+                flurryAgent.DeleteData();
+            }
         }
 
         /// <summary>

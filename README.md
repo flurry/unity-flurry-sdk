@@ -16,7 +16,7 @@ A Unity plugin for Flurry SDK
 
 ## Installation
 
-1. Download the Flurry Unity package from [flurry-sdk-2.1.0.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-2.1.0.unitypackage).
+1. Download the Flurry Unity package from [flurry-sdk-2.2.0.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-2.2.0.unitypackage).
 2. Open your project in Unity Editor, choose menu **Assets** > **Import Package** > **Custom Package…** to bring up the File chooser, and select the package downloaded.
 3. Add Flurry code
 
@@ -170,6 +170,7 @@ See [Android](http://flurry.github.io/flurry-android-sdk/)-[(FlurryAgent)](http:
   Flurry.Builder WithLogEnabled(bool enableLog);
   Flurry.Builder WithLogLevel(FlurrySDK.Flurry.LogLevel logLevel); // LogLevel = { VERBOSE, DEBUG, INFO, WARN, ERROR, ASSERT }
   Flurry.Builder WithMessaging(bool enableMessaging);
+  Flurry.Builder WithDataSaleOptOut(bool isOptOut);
   ```
 
 - **Methods to set users preferences**
@@ -181,6 +182,9 @@ See [Android](http://flurry.github.io/flurry-android-sdk/)-[(FlurryAgent)](http:
   void SetSessionOrigin(string originName, string deepLink);
   void SetUserId(string userId);
   void SetVersionName(string versionName); // Android only. For iOS, please use Flurry.Builder.WithAppVersion() instead.
+
+  void SetDataSaleOptOut(bool isOptOut);
+  void DeleteData();
 
   void AddOrigin(string originName, string originVersion);
   void AddOrigin(string originName, string originVersion, IDictionary<string, string> originParameters);

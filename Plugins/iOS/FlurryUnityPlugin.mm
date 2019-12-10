@@ -17,6 +17,7 @@
 #import "FlurryUnityPlugin.h"
 #import "Flurry.h"
 #import "FlurryMessaging.h"
+#import "FlurryCCPA.h"
 
 @implementation FlurryUnityPlugin
 
@@ -128,6 +129,10 @@ extern "C" {
         [builder withCrashReporting: crashReporting];
     }
     
+    const void flurryWithDataSaleOptOut(bool isOptOut){
+        [builder withDataSaleOptOut: isOptOut];
+    }
+    
     const void flurryWithLogLevel(int logLevel){
         
         if (FlurryLogEnabled) {
@@ -174,6 +179,14 @@ extern "C" {
     const void flurrySetupMessagingWithAutoIntegration() {
         FlurryUnityPlugin* sharedInstance = [FlurryUnityPlugin shared];
         [sharedInstance setupFlurryAutoMessaging];
+    }
+    
+    const void flurrySetDataSaleOptOut(bool isOptOut){
+        [FlurryCCPA setDataSaleOptOut: isOptOut];
+    }
+    
+    const void flurrySetDelete(){
+        [FlurryCCPA setDelete];
     }
     
     const int flurryLogEvent(const char *eventName){
