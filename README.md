@@ -16,7 +16,7 @@ A Unity plugin for Flurry SDK
 
 ## Installation
 
-1. Download the Flurry Unity package from [flurry-sdk-2.2.0.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-2.2.0.unitypackage).
+1. Download the Flurry Unity package from [flurry-sdk-2.3.0.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-2.3.0.unitypackage).
 2. Open your project in Unity Editor, choose menu **Assets** > **Import Package** > **Custom Package…** to bring up the File chooser, and select the package downloaded.
 3. Add Flurry code
 
@@ -96,10 +96,13 @@ public class FlurryStart : MonoBehaviour
         Debug.Log("AgentVersion: " + Flurry.GetAgentVersion());
         Debug.Log("ReleaseVersion: " + Flurry.GetReleaseVersion());
 
-        // Set users preferences.
+        // Set user preferences.
         Flurry.SetAge(36);
         Flurry.SetGender(Flurry.Gender.Female);
         Flurry.SetReportLocation(true);
+  
+        // Set user properties.
+        Flurry.UserProperties.Set(Flurry.UserProperties.PROPERTY_REGISTERED_USER, "True");
 
         // Set Messaging listener
         Flurry.SetMessagingListener(new MyMessagingListener());
@@ -173,7 +176,7 @@ See [Android](http://flurry.github.io/flurry-android-sdk/)-[(FlurryAgent)](http:
   Flurry.Builder WithDataSaleOptOut(bool isOptOut);
   ```
 
-- **Methods to set users preferences**
+- **Methods to set user preferences**
 
   ```c
   void SetAge(int age);
@@ -189,6 +192,19 @@ See [Android](http://flurry.github.io/flurry-android-sdk/)-[(FlurryAgent)](http:
   void AddOrigin(string originName, string originVersion);
   void AddOrigin(string originName, string originVersion, IDictionary<string, string> originParameters);
   void AddSessionProperty(string name, string value);
+  ```
+
+- **Methods in Flurry.UserProperties to set user properties**
+
+  ```c
+  void Set(string propertyName, string propertyValue);
+  void Set(string propertyName, List<string> propertyValues);
+  void Add(string propertyName, string propertyValue);
+  void Add(string propertyName, List<string> propertyValues);
+  void Remove(string propertyName);
+  void Remove(string propertyName, string propertyValue);
+  void Remove(string propertyName, List<string> propertyValues);
+  void Flag(string propertyName);
   ```
 
 - **Methods to get Flurry versions**

@@ -132,6 +132,82 @@ namespace FlurrySDKInternal
         [DllImport("__Internal")]
         private static extern void flurrySetIAPReportingEnabled(bool isEnabled);
 
+        [DllImport("__Internal")]
+        private static extern void flurrySetUserPropertyValue(string propertyName, string propertyValue);
+
+        [DllImport("__Internal")]
+        private static extern void flurrySetUserPropertyValues(string propertyName, string propertyValues);
+
+        [DllImport("__Internal")]
+        private static extern void flurryAddUserPropertyValue(string propertyName, string propertyValue);
+
+        [DllImport("__Internal")]
+        private static extern void flurryAddUserPropertyValues(string propertyName, string propertyValues);
+
+        [DllImport("__Internal")]
+        private static extern void flurryRemoveUserPropertyValue(string propertyName, string propertyValue);
+
+        [DllImport("__Internal")]
+        private static extern void flurryRemoveUserPropertyValues(string propertyName, string propertyValues);
+
+        [DllImport("__Internal")]
+        private static extern void flurryRemoveUserProperty(string propertyName);
+
+        [DllImport("__Internal")]
+        private static extern void flurryFlagUserProperty(string propertyName);
+
+        public class AgentUserPropertiesIOS : AgentUserProperties
+        {
+            public override void Set(string propertyName, string propertyValue)
+            {
+                flurrySetUserPropertyValue(propertyName, propertyValue);
+            }
+
+            public override void Set(string propertyName, List<string> propertyValues)
+            {
+                string values;
+                values = String.Join("\n", propertyValues);
+
+                flurrySetUserPropertyValues(propertyName, values);
+            }
+
+            public override void Add(string propertyName, string propertyValue)
+            {
+                flurryAddUserPropertyValue(propertyName, propertyValue);
+            }
+
+            public override void Add(string propertyName, List<string> propertyValues)
+            {
+                string values;
+                values = String.Join("\n", propertyValues);
+
+                flurryAddUserPropertyValues(propertyName, values);
+            }
+
+            public override void Remove(string propertyName, string propertyValue)
+            {
+                flurryRemoveUserPropertyValue(propertyName, propertyValue);
+            }
+
+            public override void Remove(string propertyName, List<string> propertyValues)
+            {
+                string values;
+                values = String.Join("\n", propertyValues);
+
+                flurryRemoveUserPropertyValues(propertyName, values);
+            }
+
+            public override void Remove(string propertyName)
+            {
+                flurryRemoveUserProperty(propertyName);
+            }
+
+            public override void Flag(string propertyName)
+            {
+                flurryFlagUserProperty(propertyName);
+            }
+        }
+
         public class AgentBuilderIOS : AgentBuilder
         {
             public AgentBuilderIOS()

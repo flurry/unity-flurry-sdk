@@ -18,6 +18,7 @@
 #import "Flurry.h"
 #import "FlurryMessaging.h"
 #import "FlurryCCPA.h"
+#import "FlurryUserProperties.h"
 
 @implementation FlurryUnityPlugin
 
@@ -53,7 +54,7 @@ static FlurryUnityPlugin *_sharedInstance;
     NSLog(@"Flurry session started");
     
     NSString* originName = @"unity-flurry-sdk";
-    NSString* originVersion = @"2.2.0";
+    NSString* originVersion = @"2.3.0";
     
     [Flurry addOrigin:originName withVersion:originVersion];
     
@@ -112,6 +113,16 @@ NSMutableDictionary* keyValueToDict(const char* keys, const char* values)
     }
     
     return dict;
+}
+
+NSArray* cStringToArray(const char* values) {
+    if (!values) {
+        return nil;
+    }
+    
+    NSArray* valuesArray = [strToNSStr(values) componentsSeparatedByString : @"\n"];
+    
+    return valuesArray;
 }
 
 extern "C" {
@@ -306,6 +317,38 @@ extern "C" {
     
     const void flurrySetIAPReportingEnabled(bool enableIAP){
         [Flurry setIAPReportingEnabled: enableIAP];
+    }
+    
+    const void flurrySetUserPropertyValues(const char* propertyName, const char* values){
+        [FlurryUserProperties set:strToNSStr(propertyName) values:cStringToArray(values)];
+    }
+    
+    const void flurrySetUserPropertyValue(const char* propertyName, const char* value){
+        [FlurryUserProperties set:strToNSStr(propertyName) value:strToNSStr(value)];
+    }
+    
+    const void flurryAddUserPropertyValues(const char* propertyName, const char* values){
+        [FlurryUserProperties add:strToNSStr(propertyName) values:cStringToArray(values)];
+    }
+    
+    const void flurryAddUserPropertyValue(const char* propertyName, const char* value){
+        [FlurryUserProperties add:strToNSStr(propertyName) value:strToNSStr(value)];
+    }
+    
+    const void flurryRemoveUserPropertyValues(const char* propertyName, const char* values){
+        [FlurryUserProperties remove:strToNSStr(propertyName) values:cStringToArray(values)];
+    }
+    
+    const void flurryRemoveUserPropertyValue(const char* propertyName, const char* value){
+        [FlurryUserProperties remove:strToNSStr(propertyName) value:strToNSStr(value)];
+    }
+    
+    const void flurryRemoveUserProperty(const char* propertyName){
+        [FlurryUserProperties remove:strToNSStr(propertyName)];
+    }
+    
+    const void flurryFlagUserProperty(const char* propertyName){
+        [FlurryUserProperties flag:strToNSStr(propertyName)];
     }
 }
 

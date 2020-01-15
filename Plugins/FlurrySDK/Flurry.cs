@@ -313,7 +313,146 @@ namespace FlurrySDK
             }
 
         }
-        
+
+        /// <summary>
+        /// User Properties class for Flurry
+        /// </summary>
+        public class UserProperties
+        {
+            public static string PROPERTY_CURRENCY_PREFERENCE = "Flurry.CurrencyPreference";
+            public static string PROPERTY_PURCHASER =           "Flurry.Purchaser";
+            public static string PROPERTY_REGISTERED_USER =     "Flurry.RegisteredUser";
+            public static string PROPERTY_SUBSCRIBER =          "Flurry.Subscriber";
+
+            // init static Flurry agent UserProperties object.
+            private static FlurryAgent.AgentUserProperties userProperties;
+            static UserProperties()
+            {
+#if UNITY_ANDROID
+                if (Application.platform == RuntimePlatform.Android)
+                {
+                    userProperties = new FlurryAgentAndroid.AgentUserPropertiesAndroid();
+                }
+#elif UNITY_IPHONE
+                if (Application.platform == RuntimePlatform.IPhonePlayer)
+                {
+                    userProperties = new FlurryAgentIOS.AgentUserPropertiesIOS();
+                }
+#else
+                userProperties = null;
+#endif
+            }
+
+            /// <summary>
+            /// Exactly set, or replace if any previously exists, any state for the property.
+            /// null clears the property state.
+            /// </summary>
+            /// <param name="propertyName">Property name.</param>
+            /// <param name="propertyValue">Single property value.</param>
+            public static void Set(string propertyName, string propertyValue)
+            {
+                if (userProperties != null)
+                {
+                    userProperties.Set(propertyName, propertyValue);
+                }
+            }
+
+            /// <summary>
+            /// Exactly set, or replace if any previously exists, any state for the property.
+            /// Empty list or null clears the property state.
+            /// </summary>
+            /// <param name="propertyName">Property name.</param>
+            /// <param name="propertyValues">List of property values.</param>
+            public static void Set(string propertyName, List<string> propertyValues)
+            {
+                if (userProperties != null)
+                {
+                    userProperties.Set(propertyName, propertyValues);
+                }
+            }
+
+            /// <summary>
+            /// Extend any property, even no previous property.
+            /// Adding values already included in the state has no effect and does not error.
+            /// </summary>
+            /// <param name="propertyName">Property name.</param>
+            /// <param name="propertyValue">Single property value.</param>
+            public static void Add(string propertyName, string propertyValue)
+            {
+                if (userProperties != null)
+                {
+                    userProperties.Add(propertyName, propertyValue);
+                }
+            }
+
+            /// <summary>
+            /// Extend any property, even no previous property.
+            /// Adding values already included in the state has no effect and does not error.
+            /// </summary>
+            /// <param name="propertyName">Property name.</param>
+            /// <param name="propertyValues">List of property values.</param>
+            public static void Add(string propertyName, List<string> propertyValues)
+            {
+                if (userProperties != null)
+                {
+                    userProperties.Add(propertyName, propertyValues);
+                }
+            }
+
+            /// <summary>
+            /// Reduce any property.
+            /// Removing values not already included in the state has no effect and does not error
+            /// </summary>
+            /// <param name="propertyName">Property name.</param>
+            /// <param name="propertyValue">Single property value.</param>
+            public static void Remove(string propertyName, string propertyValue)
+            {
+                if (userProperties != null)
+                {
+                    userProperties.Remove(propertyName, propertyValue);
+                }
+            }
+
+            /// <summary>
+            /// Reduce any property.
+            /// Removing values not already included in the state has no effect and does not error
+            /// </summary>
+            /// <param name="propertyName">Property name.</param>
+            /// <param name="propertyValues">List of property values.</param>
+            public static void Remove(string propertyName, List<string> propertyValues)
+            {
+                if (userProperties != null)
+                {
+                    userProperties.Remove(propertyName, propertyValues);
+                }
+            }
+
+            /// <summary>
+            /// Exactly set, or replace if any previously exists, any state for the property to be empty.
+            /// </summary>
+            /// <param name="propertyName">Property name.</param>
+            public static void Remove(string propertyName)
+            {
+                if (userProperties != null)
+                {
+                    userProperties.Remove(propertyName);
+                }
+            }
+
+            /// <summary>
+            /// Exactly set, or replace if any previously exists, any state for the property to a single true state.
+            /// Implies that value is boolean and should only be flagged and cleared.
+            /// </summary>
+            /// <param name="propertyName">Property name.</param>
+            public static void Flag(string propertyName)
+            {
+                if (userProperties != null)
+                {
+                    userProperties.Flag(propertyName);
+                }
+            }
+        }
+
         /// <summary>
         /// An api to send ccpa compliance data to Flurry on the user's choice to opt out or opt in to data sale to third parties. The user's preference must be used to initialize the WithDataSaleOptOut setting in the FlurrySessionBuilder in all future sessions.
         /// </summary>

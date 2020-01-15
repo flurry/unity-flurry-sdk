@@ -27,7 +27,7 @@ namespace FlurrySDKInternal
         public static NetworkReachability internetReachability = Application.internetReachability;
 
         private static readonly string ORIGIN_NAME = "unity-flurry-sdk";
-        private static readonly string ORIGIN_VERSION = "2.2.0";
+        private static readonly string ORIGIN_VERSION = "2.3.0";
 
         private static AndroidJavaClass cls_FlurryAgent = new AndroidJavaClass("com.flurry.android.FlurryAgent");
         private static AndroidJavaClass cls_FlurryAgentConstants = new AndroidJavaClass("com.flurry.android.Constants");
@@ -44,6 +44,7 @@ namespace FlurrySDKInternal
                     using (AndroidJavaObject obj_Activity = cls_UnityPlayer.GetStatic<AndroidJavaObject>("currentActivity"))
                     {
                         cls_FlurryAgent.CallStatic("addOrigin", ORIGIN_NAME, ORIGIN_VERSION);
+                        obj_FlurryAgentBuilder.Call<AndroidJavaObject>("withSessionForceStart", true);
                         obj_FlurryAgentBuilder.Call("build", obj_Activity, apiKey);
                     }
                 }
@@ -87,6 +88,51 @@ namespace FlurrySDKInternal
             public override void WithDataSaleOptOut(bool isOptOut)
             {
                 obj_FlurryAgentBuilder.Call<AndroidJavaObject>("withDataSaleOptOut", isOptOut);
+            }
+        }
+
+        public class AgentUserPropertiesAndroid : AgentUserProperties
+        {
+            private static AndroidJavaClass cls_FlurryUserProperties = new AndroidJavaClass("com.flurry.android.FlurryAgent$UserProperties");
+
+            public override void Set(string propertyName, string propertyValue)
+            {
+                cls_FlurryUserProperties.CallStatic("set", propertyName, propertyValue);
+            }
+
+            public override void Set(string propertyName, List<string> propertyValues)
+            {
+                cls_FlurryUserProperties.CallStatic("set", propertyName, ConvertToList(propertyValues));
+            }
+
+            public override void Add(string propertyName, string propertyValue)
+            {
+                cls_FlurryUserProperties.CallStatic("add", propertyName, propertyValue);
+            }
+
+            public override void Add(string propertyName, List<string> propertyValues)
+            {
+                cls_FlurryUserProperties.CallStatic("add", propertyName, ConvertToList(propertyValues));
+            }
+
+            public override void Remove(string propertyName, string propertyValue)
+            {
+                cls_FlurryUserProperties.CallStatic("remove", propertyName, propertyValue);
+            }
+
+            public override void Remove(string propertyName, List<string> propertyValues)
+            {
+                cls_FlurryUserProperties.CallStatic("remove", propertyName, ConvertToList(propertyValues));
+            }
+
+            public override void Remove(string propertyName)
+            {
+                cls_FlurryUserProperties.CallStatic("remove", propertyName);
+            }
+
+            public override void Flag(string propertyName)
+            {
+                cls_FlurryUserProperties.CallStatic("flag", propertyName);
             }
         }
 
@@ -295,6 +341,20 @@ namespace FlurrySDKInternal
         public override void SetIAPReportingEnabled(bool enableIAP)
         {
             Debug.Log("setIAPReportingEnabled is not supported on Android. Please use LogPayment instead.");
+        }
+
+        private static AndroidJavaObject ConvertToList<TValue>(List<TValue> list)
+        {
+            AndroidJavaObject obj_ArrayList = new AndroidJavaObject("java.util.ArrayList");
+            if (list != null)
+            {
+                foreach (TValue value in list)
+                {
+                    obj_ArrayList.Call<bool>("add", value);
+                }
+            }
+
+            return obj_ArrayList;
         }
 
         private static AndroidJavaObject ConvertToMap<TKey, TValue>(IDictionary<TKey, TValue> dictionary)

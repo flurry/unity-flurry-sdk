@@ -41,7 +41,26 @@ namespace FlurrySDKInternal
             
             public abstract void WithDataSaleOptOut(bool isOptOut);
         }
-        
+
+        public abstract class AgentUserProperties
+        {
+            public abstract void Set(string propertyName, string propertyValue);
+
+            public abstract void Set(string propertyName, List<string> propertyValues);
+
+            public abstract void Add(string propertyName, string propertyValue);
+
+            public abstract void Add(string propertyName, List<string> propertyValues);
+
+            public abstract void Remove(string propertyName, string propertyValue);
+
+            public abstract void Remove(string propertyName, List<string> propertyValues);
+
+            public abstract void Remove(string propertyName);
+
+            public abstract void Flag(string propertyName);
+        }
+
         public abstract void SetAge(int age);
 
         public abstract void SetGender(FlurrySDK.Flurry.Gender gender);
