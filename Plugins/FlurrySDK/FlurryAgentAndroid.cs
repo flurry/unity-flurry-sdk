@@ -27,11 +27,10 @@ namespace FlurrySDKInternal
         public static NetworkReachability internetReachability = Application.internetReachability;
 
         private static readonly string ORIGIN_NAME = "unity-flurry-sdk";
-        private static readonly string ORIGIN_VERSION = "2.3.0";
+        private static readonly string ORIGIN_VERSION = "2.4.0";
 
         private static AndroidJavaClass cls_FlurryAgent = new AndroidJavaClass("com.flurry.android.FlurryAgent");
         private static AndroidJavaClass cls_FlurryAgentConstants = new AndroidJavaClass("com.flurry.android.Constants");
-        private static AndroidJavaClass cls_FlurryApplication = new AndroidJavaClass("com.flurry.android.FlurryUnityApplication");
 
         public class AgentBuilderAndroid : AgentBuilder
         {
@@ -196,9 +195,9 @@ namespace FlurrySDKInternal
 
         public override void SetGender(FlurrySDK.Flurry.Gender gender)
         {
-            byte flurryGender = (gender == FlurrySDK.Flurry.Gender.Male
-                                 ? cls_FlurryAgentConstants.GetStatic<byte>("MALE")
-                                 : cls_FlurryAgentConstants.GetStatic<byte>("FEMALE"));
+            sbyte flurryGender = (gender == FlurrySDK.Flurry.Gender.Male
+                                 ? cls_FlurryAgentConstants.GetStatic<sbyte>("MALE")
+                                 : cls_FlurryAgentConstants.GetStatic<sbyte>("FEMALE"));
             cls_FlurryAgent.CallStatic("setGender", flurryGender);
         }
 
@@ -253,7 +252,13 @@ namespace FlurrySDKInternal
 
             if (flurryMessagingListener != null)
             {
-                cls_FlurryApplication.CallStatic("withFlurryMessagingListener", new MessagingCallback(flurryMessagingListener));
+                try
+                {
+                    AndroidJavaClass cls_FlurryApplication = new AndroidJavaClass("com.flurry.android.FlurryUnityApplication");
+                    cls_FlurryApplication.CallStatic("withFlurryMessagingListener", new MessagingCallback(flurryMessagingListener));
+                } catch(AndroidJavaException ex) {
+                    Debug.Log("To enable Flurry Messaging for Android, please remember to include Flurry Marketing libraries.");
+                }
             }
         }
 

@@ -1,5 +1,11 @@
 # Change Log
 
+## v2.4.0 (2020-01-30)
+
+#### Features
+
+* Separate Flurry Push for messaging from the Analytics only package
+
 ## v2.3.0 (2020-01-16)
 
 #### Features

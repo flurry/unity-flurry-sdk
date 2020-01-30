@@ -16,9 +16,12 @@
 
 #import "FlurryUnityPlugin.h"
 #import "Flurry.h"
-#import "FlurryMessaging.h"
 #import "FlurryCCPA.h"
 #import "FlurryUserProperties.h"
+
+#if __has_include("FlurryMessaging.h")
+#import "FlurryMessaging.h"
+#endif
 
 @implementation FlurryUnityPlugin
 
@@ -41,12 +44,14 @@ static FlurryUnityPlugin *_sharedInstance;
 }
 
 - (void) setupFlurryAutoMessaging {
+    #if __has_include("FlurryMessaging.h")
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         [FlurryMessaging setAutoIntegrationForMessaging];
         FlurryUnityPlugin* sharedInstance = [FlurryUnityPlugin shared];
         [FlurryMessaging setMessagingDelegate: (id <FlurryMessagingDelegate>)  sharedInstance];
     });
+    #endif
 }
 
 - (void) flurrySessionDidCreateWithInfo:  (NSDictionary *)  info
@@ -54,7 +59,13 @@ static FlurryUnityPlugin *_sharedInstance;
     NSLog(@"Flurry session started");
     
     NSString* originName = @"unity-flurry-sdk";
-    NSString* originVersion = @"2.3.0";
+    
+    #if __has_include("FlurryMessaging.h")
+    NSString* originVersion = @"2.4.0.messaging";
+    #else
+    NSString* originVersion = @"2.4.0";
+    #endif
+    
     
     [Flurry addOrigin:originName withVersion:originVersion];
     
@@ -64,6 +75,7 @@ static FlurryUnityPlugin *_sharedInstance;
     
 };
 
+#if __has_include("FlurryMessaging.h")
 -(void) didReceiveMessage:(nonnull FlurryMessage*)message {
     NSLog(@"didReceiveMessage = %@", [message description]);
     //App specific implementation
@@ -77,6 +89,7 @@ static FlurryUnityPlugin *_sharedInstance;
     //Ex: Deeplink logic. See Flurry Push sample App (loading of viewControllers (nibs or storboards))
     
 }
+#endif
 
 NSString* strToNSStr(const char* str)
 {
