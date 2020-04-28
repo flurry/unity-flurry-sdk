@@ -89,7 +89,7 @@ public class FlurryStart : MonoBehaviour
                   .WithCrashReporting(true)
                   .WithLogEnabled(true)
                   .WithLogLevel(Flurry.LogLevel.VERBOSE)
-                  .WithMessaging(true);
+                  .WithMessaging(true)
                   .Build(FLURRY_API_KEY);
 
         // Example to get Flurry versions.
