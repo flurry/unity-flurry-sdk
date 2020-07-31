@@ -16,7 +16,7 @@ A Unity plugin for Flurry SDK
 
 ## Installation
 
-1. Download the Flurry Unity package from [flurry-sdk-2.6.0.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-2.6.0.unitypackage), or [flurry-sdk-2.6.0-push.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-2.6.0-push.unitypackage) if you want to use Flurry Push.
+1. Download the Flurry Unity package from [flurry-sdk-2.7.0.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-2.7.0.unitypackage), or [flurry-sdk-2.7.0-push.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-2.7.0-push.unitypackage) if you want to use Flurry Push.
 2. Open your project in Unity Editor, choose menu **Assets** > **Import Package** > **Custom Package…** to bring up the File chooser, and select the package downloaded.
 3. Add Flurry code
 
@@ -171,7 +171,8 @@ See [Android](http://flurry.github.io/flurry-android-sdk/)-[(FlurryAgent)](http:
   Flurry.Builder WithContinueSessionMillis(long sessionMillis);
   Flurry.Builder WithIncludeBackgroundSessionsInMetrics(bool includeBackgroundSessionsInMetrics);
   Flurry.Builder WithLogEnabled(bool enableLog);
-  Flurry.Builder WithLogLevel(FlurrySDK.Flurry.LogLevel logLevel); // LogLevel = { VERBOSE, DEBUG, INFO, WARN, ERROR, ASSERT }
+  Flurry.Builder WithLogLevel(FlurrySDK.Flurry.LogLevel logLevel); // logLevel = { VERBOSE, DEBUG, INFO, WARN, ERROR, ASSERT }
+  Flurry.Builder.WithPerformanceMetrics(int performanceMetrics); // performanceMetrics = { Flurry.Performance.NONE, COLD_START, SCREEN_TIME, ALL }
   Flurry.Builder WithMessaging(bool enableMessaging);
   Flurry.Builder WithDataSaleOptOut(bool isOptOut);
   ```
@@ -241,6 +242,14 @@ See [Android](http://flurry.github.io/flurry-android-sdk/)-[(FlurryAgent)](http:
 
   ```c
   void SetIAPReportingEnabled(bool enableIAP);
+  ```
+
+- **Methods for Flurry Performance Metrics**
+
+  ```c
+  void Flurry.Performance.StartResourceLogger();
+  void Flurry.Performance.LogResourceLogger(string id);
+  void Flurry.Performance.ReportFullyDrawn();
   ```
 
 - **Methods for Messaging (Flurry Push)**

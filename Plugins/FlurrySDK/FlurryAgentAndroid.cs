@@ -27,7 +27,7 @@ namespace FlurrySDKInternal
         public static NetworkReachability internetReachability = Application.internetReachability;
 
         private static readonly string ORIGIN_NAME = "unity-flurry-sdk";
-        private static readonly string ORIGIN_VERSION = "2.6.0";
+        private static readonly string ORIGIN_VERSION = "2.7.0";
 
         private static AndroidJavaClass cls_FlurryAgent = new AndroidJavaClass("com.flurry.android.FlurryAgent");
         private static AndroidJavaClass cls_FlurryAgentConstants = new AndroidJavaClass("com.flurry.android.Constants");
@@ -88,6 +88,11 @@ namespace FlurrySDKInternal
             {
                 obj_FlurryAgentBuilder.Call<AndroidJavaObject>("withDataSaleOptOut", isOptOut);
             }
+
+            public override void WithPerformanceMetrics(int performanceMetrics)
+            {
+                obj_FlurryAgentBuilder.Call<AndroidJavaObject>("withPerformanceMetrics", performanceMetrics);
+            }
         }
 
         public class AgentUserPropertiesAndroid : AgentUserProperties
@@ -132,6 +137,30 @@ namespace FlurrySDKInternal
             public override void Flag(string propertyName)
             {
                 cls_FlurryUserProperties.CallStatic("flag", propertyName);
+            }
+        }
+
+        public class AgentPerformanceAndroid : AgentPerformance
+        {
+            private static AndroidJavaClass cls_FlurryPerformance = new AndroidJavaClass("com.flurry.android.FlurryPerformance");
+            private AndroidJavaObject obj_FlurryResourceLogger;
+
+            public override void ReportFullyDrawn()
+            {
+                cls_FlurryPerformance.CallStatic("reportFullyDrawn");
+            }
+
+            public override void StartResourceLogger()
+            {
+                obj_FlurryResourceLogger = new AndroidJavaObject("com.flurry.android.FlurryPerformance$ResourceLogger");
+            }
+
+            public override void LogResourceLogger(string id)
+            {
+                if (obj_FlurryResourceLogger != null)
+                {
+                    obj_FlurryResourceLogger.Call("logEvent", id);
+                }
             }
         }
 
@@ -256,7 +285,7 @@ namespace FlurrySDKInternal
                 {
                     AndroidJavaClass cls_FlurryApplication = new AndroidJavaClass("com.flurry.android.FlurryUnityApplication");
                     cls_FlurryApplication.CallStatic("withFlurryMessagingListener", new MessagingCallback(flurryMessagingListener));
-                } catch(AndroidJavaException ex) {
+                } catch(AndroidJavaException) {
                     Debug.Log("To enable Flurry Messaging for Android, please remember to include Flurry Marketing libraries.");
                 }
             }

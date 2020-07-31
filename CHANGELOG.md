@@ -1,5 +1,13 @@
 # Change Log
 
+## v2.7.0 (2020-08-02)
+
+#### Features
+
+* Upgrade Flurry Android SDK version to 12.5.0
+* Upgrade Flurry iOS SDK version to 10.3.4
+* Support Performance Metrics API for Android
+
 ## v2.6.0 (2020-06-29)
 
 #### Features

@@ -40,6 +40,8 @@ namespace FlurrySDKInternal
             public abstract void WithMessaging(bool enableMessaging);
             
             public abstract void WithDataSaleOptOut(bool isOptOut);
+
+            public abstract void WithPerformanceMetrics(int performanceMetrics);
         }
 
         public abstract class AgentUserProperties
@@ -59,6 +61,15 @@ namespace FlurrySDKInternal
             public abstract void Remove(string propertyName);
 
             public abstract void Flag(string propertyName);
+        }
+
+        public abstract class AgentPerformance
+        {
+            public abstract void ReportFullyDrawn();
+
+            public abstract void StartResourceLogger();
+
+            public abstract void LogResourceLogger(string id);
         }
 
         public abstract void SetAge(int age);

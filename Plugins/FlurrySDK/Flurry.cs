@@ -312,6 +312,19 @@ namespace FlurrySDK
                 return this;
             }
 
+            /// <summary>
+            /// Set flags for performance metrics.
+            /// </summary>
+            /// <returns>The builder.</returns>
+            /// <param name="performanceMetrics">Flags for performance metrics</param>
+            public Builder WithPerformanceMetrics(int performanceMetrics)
+            {
+                if (builder != null)
+                {
+                    builder.WithPerformanceMetrics(performanceMetrics);
+                }
+                return this;
+            }
         }
 
         /// <summary>
@@ -449,6 +462,81 @@ namespace FlurrySDK
                 if (userProperties != null)
                 {
                     userProperties.Flag(propertyName);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Performance class for Flurry
+        /// </summary>
+        public class Performance
+        {
+            public static int NONE        = 0;
+            public static int COLD_START  = 1;
+            public static int SCREEN_TIME = 2;
+            public static int ALL         = 1 | 2;
+
+            // init static Flurry agent PerformanceMetrics object.
+            private static FlurryAgent.AgentPerformance performance;
+            static Performance()
+            {
+#if UNITY_ANDROID
+                if (Application.platform == RuntimePlatform.Android)
+                {
+                    performance = new FlurryAgentAndroid.AgentPerformanceAndroid();
+                }
+#elif UNITY_IPHONE
+                if (Application.platform == RuntimePlatform.IPhonePlayer)
+                {
+                    performance = new FlurryAgentIOS.AgentPerformanceIOS();
+                }
+#else
+                performance = null;
+#endif
+            }
+
+            /// <summary>
+            /// Report to the Flurry Cold Start metrics that your app is now fully drawn.
+            /// This is only used to help measuring application launch times, so that the
+            /// app can report when it is fully in a usable state similar to
+            /// {@link android.app.Activity#reportFullyDrawn}.
+            /// </summary>
+            public static void ReportFullyDrawn()
+            {
+                if (performance != null)
+                {
+                    performance.ReportFullyDrawn();
+                }
+            }
+
+            /// <summary>
+            /// Provide a Resource logger that users can start before profiled codes start,
+            /// then log event after finished. Flurry will compute the time.
+            ///
+            /// e.g.
+            ///   Flurry.Performance.StartResourceLogger();
+            ///   {
+            ///       // profiled codes ...
+            ///   }
+            ///   Flurry.Performance.LogResourceLogger("My ID");
+            /// </summary>
+            public static void StartResourceLogger()
+            {
+                if (performance != null)
+                {
+                    performance.StartResourceLogger();
+                }
+            }
+
+            /// <summary>
+            /// Log Flurry Resources Consuming events.
+            /// </summary>
+            /// <param name="id">The group ID.</param>
+            public static void LogResourceLogger(string id)
+            {
+                if (performance != null)
+                {
+                    performance.LogResourceLogger(id);
                 }
             }
         }

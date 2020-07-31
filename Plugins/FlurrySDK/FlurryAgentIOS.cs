@@ -263,6 +263,29 @@ namespace FlurrySDKInternal
                     flurrySetupMessagingWithAutoIntegration();
                 }
             }
+
+            public override void WithPerformanceMetrics(int performanceMetrics)
+            {
+                Debug.Log("Flurry iOS SDK does not implement WithPerformanceMetrics method.");
+            }
+        }
+
+        public class AgentPerformanceIOS : AgentPerformance
+        {
+            public override void ReportFullyDrawn()
+            {
+                Debug.Log("Flurry iOS SDK does not implement ReportFullyDrawn method.");
+            }
+
+            public override void StartResourceLogger()
+            {
+                Debug.Log("Flurry iOS SDK does not implement StartResourceLogger method.");
+            }
+
+            public override void LogResourceLogger(string id)
+            {
+                Debug.Log("Flurry iOS SDK does not implement LogResourceLogger method.");
+            }
         }
 
         public override void SetMessagingListener(FlurrySDK.Flurry.IFlurryMessagingListener flurryMessagingListener)
