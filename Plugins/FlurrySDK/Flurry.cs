@@ -84,6 +84,18 @@ namespace FlurrySDK
         }
 
         /// <summary>
+        /// Constants for logging post install events using Flurry's FlurrySKAdNetwork class.
+        /// </summary>
+        public enum SKAdNetworkEvent
+        {
+            NoEvent       = 0,
+            Registration  = 1,
+            Login         = 2,
+            Subscription  = 3,
+            InAppPurchase = 4,
+        }
+
+        /// <summary>
         /// Status for analytics event recording.
         /// </summary>
         public enum EventRecordStatus
@@ -906,6 +918,46 @@ namespace FlurrySDK
             if (flurryAgent != null)
             {
                 flurryAgent.SetIAPReportingEnabled(enableIAP);
+            }
+        }
+
+        /// <summary>
+        /// Sets the iOS conversion value sent to Apple through SKAdNetwork.
+        /// </summary>
+        /// <param name="conversionValue">An integer value between 0-63.  The conversion values meaning is determined by the developer.</param>
+        public static void UpdateConversionValue(int conversionValue)
+        {
+            if (flurryAgent != null)
+            {
+                flurryAgent.UpdateConversionValue(conversionValue);
+            }
+        }
+
+        /// <summary>
+        /// Allows Flurry to set the SKAdNetwork conversion value for you.
+        /// The final conversion value is a decimal number between 0-63.
+        /// The conversion value is calculated from a 6 bit binary number.
+        /// The first two bits represent days of user retention from 0-3 days
+        /// The last four bits represent a true false state indicating if the user has completed the post install event.
+        /// </summary>
+        /// <param name="flurryEvent">Valid events are NoEvent, Registration, LogIn, Subscription, and InAppPurchase.</param>
+        public static void UpdateConversionValueWithEvent(FlurrySDK.Flurry.SKAdNetworkEvent flurryEvent)
+        {
+            if (flurryAgent != null)
+            {
+                flurryAgent.UpdateConversionValueWithEvent(flurryEvent);
+            }
+        }
+
+        /// <summary>
+        /// This api opens privacy dashboard in Chrome CustomTab (if its dependency's been included in the gradle and device support it as well)
+        /// otherwise will open it in the external browser.
+        /// </summary>
+        public static void OpenPrivacyDashboard()
+        {
+            if (flurryAgent != null)
+            {
+                flurryAgent.OpenPrivacyDashboard();
             }
         }
 

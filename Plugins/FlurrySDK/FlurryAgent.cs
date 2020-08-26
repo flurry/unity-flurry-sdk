@@ -127,6 +127,12 @@ namespace FlurrySDKInternal
 
         public abstract void SetIAPReportingEnabled(bool enableIAP);
 
+        public abstract void UpdateConversionValue(int conversionValue);
+
+        public abstract void UpdateConversionValueWithEvent(FlurrySDK.Flurry.SKAdNetworkEvent flurryEvent);
+
+        public abstract void OpenPrivacyDashboard();
+
         public abstract void Dispose();
 
     };

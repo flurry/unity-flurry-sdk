@@ -23,6 +23,10 @@
 #import "FlurryMessaging.h"
 #endif
 
+#if __has_include(<StoreKit/SKAdNetwork.h>)
+#import "FlurrySKAdNetwork.h"
+#endif
+
 @implementation FlurryUnityPlugin
 
 static FlurryUnityPlugin *_sharedInstance;
@@ -61,9 +65,9 @@ static FlurryUnityPlugin *_sharedInstance;
     NSString* originName = @"unity-flurry-sdk";
     
     #if __has_include("FlurryMessaging.h")
-    NSString* originVersion = @"2.7.0.messaging";
+    NSString* originVersion = @"3.0.0.messaging";
     #else
-    NSString* originVersion = @"2.7.0";
+    NSString* originVersion = @"3.0.0";
     #endif
     
     
@@ -243,7 +247,8 @@ extern "C" {
     }
     
     const void flurryLogPageView() {
-        [Flurry logPageView];
+       // [Flurry logPageView];
+        NSLog(@"[Flurry logPageView] is removed in Flurry 11.0.0");
     }
     
     
@@ -330,6 +335,24 @@ extern "C" {
     
     const void flurrySetIAPReportingEnabled(bool enableIAP){
         [Flurry setIAPReportingEnabled: enableIAP];
+    }
+    
+    const void flurryOpenPrivacyDashboard(){
+        [Flurry openPrivacyDashboard:^(BOOL success) {
+            NSLog(@"Flurry privacy dashboard opened successfully.");
+        }];
+    }
+    
+    const void flurryUpdateConversionValue(int conversionValue){
+        if (@available(iOS 14.0, *)) {
+            [FlurrySKAdNetwork flurryUpdateConversionValue: conversionValue];
+        }
+    }
+    
+    const void flurryUpdateConversionValueWithEvent(int flurryEvent){
+        if (@available(iOS 14.0, *)) {
+            [FlurrySKAdNetwork flurryUpdateConversionValueWithEvent:(FlurryConversionValueEventType) flurryEvent];
+        }
     }
     
     const void flurrySetUserPropertyValues(const char* propertyName, const char* values){

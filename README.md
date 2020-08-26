@@ -16,7 +16,7 @@ A Unity plugin for Flurry SDK
 
 ## Installation
 
-1. Download the Flurry Unity package from [flurry-sdk-2.7.0.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-2.7.0.unitypackage), or [flurry-sdk-2.7.0-push.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-2.7.0-push.unitypackage) if you want to use Flurry Push.
+1. Download the Flurry Unity package from [flurry-sdk-3.0.0.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-3.0.0.unitypackage), or [flurry-sdk-3.0.0-push.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-3.0.0-push.unitypackage) if you want to use Flurry Push.
 2. Open your project in Unity Editor, choose menu **Assets** > **Import Package** > **Custom Package…** to bring up the File chooser, and select the package downloaded.
 3. Add Flurry code
 
@@ -187,12 +187,17 @@ See [Android](http://flurry.github.io/flurry-android-sdk/)-[(FlurryAgent)](http:
   void SetUserId(string userId);
   void SetVersionName(string versionName); // Android only. For iOS, please use Flurry.Builder.WithAppVersion() instead.
 
-  void SetDataSaleOptOut(bool isOptOut);
-  void DeleteData();
-
   void AddOrigin(string originName, string originVersion);
   void AddOrigin(string originName, string originVersion, IDictionary<string, string> originParameters);
   void AddSessionProperty(string name, string value);
+  ```
+
+- **Methods to set privacy preferences**
+
+  ```c
+  void SetDataSaleOptOut(bool isOptOut);
+  void DeleteData();
+  void OpenPrivacyDashboard();
   ```
 
 - **Methods in Flurry.UserProperties to set user properties**
@@ -242,6 +247,13 @@ See [Android](http://flurry.github.io/flurry-android-sdk/)-[(FlurryAgent)](http:
 
   ```c
   void SetIAPReportingEnabled(bool enableIAP);
+  ```
+
+- **Methods to set the iOS conversion value sent to Apple through SKAdNetwork (iOS)**
+
+  ```c
+  void UpdateConversionValue(int conversionValue)
+  void UpdateConversionValueWithEvent(FlurrySDK.Flurry.SKAdNetworkEvent flurryEvent); // flurryEvent = { NoEvent, Registration, Login, Subscription, InAppPurchase }
   ```
 
 - **Methods for Flurry Performance Metrics**

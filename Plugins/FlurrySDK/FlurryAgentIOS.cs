@@ -133,6 +133,15 @@ namespace FlurrySDKInternal
         private static extern void flurrySetIAPReportingEnabled(bool isEnabled);
 
         [DllImport("__Internal")]
+        private static extern void flurryUpdateConversionValue(int conversionValue);
+
+        [DllImport("__Internal")]
+        private static extern void flurryUpdateConversionValueWithEvent(int flurryEvent);
+
+        [DllImport("__Internal")]
+        private static extern void flurryOpenPrivacyDashboard();
+
+        [DllImport("__Internal")]
         private static extern void flurrySetUserPropertyValue(string propertyName, string propertyValue);
 
         [DllImport("__Internal")]
@@ -441,6 +450,21 @@ namespace FlurrySDKInternal
         {
             Debug.Log("Flurry iOS SDK does not implement LogPayment method.");
             return 1;
+        }
+
+        public override void UpdateConversionValue(int conversionValue)
+        {
+           flurryUpdateConversionValue(conversionValue);
+        }
+
+        public override void UpdateConversionValueWithEvent(FlurrySDK.Flurry.SKAdNetworkEvent flurryEvent)
+        {
+           flurryUpdateConversionValueWithEvent((int)flurryEvent);
+        }
+
+        public override void OpenPrivacyDashboard()
+        {
+            flurryOpenPrivacyDashboard();
         }
 
         public override void SetIAPReportingEnabled(bool enableIAP)

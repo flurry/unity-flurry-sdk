@@ -1,5 +1,14 @@
 # Change Log
 
+# v3.0.0 (2020-08-26)
+
+#### Features
+
+* Upgrade Flurry iOS SDK version to 11.0.0
+* Support iOS 14 Compliant
+* Support the iOS SKAdNetwork conversion
+* Support opening Privacy Dashboard
+
 ## v2.7.0 (2020-08-02)
 
 #### Features

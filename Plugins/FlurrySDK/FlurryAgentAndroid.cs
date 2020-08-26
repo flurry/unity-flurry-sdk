@@ -27,7 +27,7 @@ namespace FlurrySDKInternal
         public static NetworkReachability internetReachability = Application.internetReachability;
 
         private static readonly string ORIGIN_NAME = "unity-flurry-sdk";
-        private static readonly string ORIGIN_VERSION = "2.7.0";
+        private static readonly string ORIGIN_VERSION = "3.0.0";
 
         private static AndroidJavaClass cls_FlurryAgent = new AndroidJavaClass("com.flurry.android.FlurryAgent");
         private static AndroidJavaClass cls_FlurryAgentConstants = new AndroidJavaClass("com.flurry.android.Constants");
@@ -375,6 +375,53 @@ namespace FlurrySDKInternal
         public override void SetIAPReportingEnabled(bool enableIAP)
         {
             Debug.Log("setIAPReportingEnabled is not supported on Android. Please use LogPayment instead.");
+        }
+
+        public override void UpdateConversionValue(int conversionValue)
+        {
+           Debug.Log("UpdateConversionValue is for iOS only.");
+        }
+
+        public override void UpdateConversionValueWithEvent(FlurrySDK.Flurry.SKAdNetworkEvent flurryEvent)
+        {
+           Debug.Log("UpdateConversionValueWithEvent is for iOS only.");
+        }
+
+        class PrivacySessionCallback : AndroidJavaProxy
+        {
+            public PrivacySessionCallback()
+                : base("com.flurry.android.FlurryPrivacySession$Callback")
+            {
+                // no-op
+            }
+
+#pragma warning disable IDE1006 // Naming Styles
+
+            void success()
+            {
+                // no-op
+            }
+
+            void failure()
+            {
+                // no-op
+            }
+
+#pragma warning restore IDE1006 // Naming Styles
+
+        }
+
+        public override void OpenPrivacyDashboard()
+        {
+            using (AndroidJavaClass cls_UnityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+            {
+                using (AndroidJavaObject obj_Activity = cls_UnityPlayer.GetStatic<AndroidJavaObject>("currentActivity"))
+                {
+                    AndroidJavaObject obj_Request = new AndroidJavaObject("com.flurry.android.FlurryPrivacySession$Request",
+                        obj_Activity, new PrivacySessionCallback());
+                    cls_FlurryAgent.CallStatic("openPrivacyDashboard", obj_Request);
+                }
+            }
         }
 
         private static AndroidJavaObject ConvertToList<TValue>(List<TValue> list)

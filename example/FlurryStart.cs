@@ -32,22 +32,30 @@ public class FlurryStart : MonoBehaviour
 
     void Start()
     {
+        // Note: When enabling Messaging, Flurry Android should be initialized by using AndroidManifest.xml.
         // Initialize Flurry once.
         new Flurry.Builder()
                   .WithCrashReporting(true)
                   .WithLogEnabled(true)
-                  .WithLogLevel(Flurry.LogLevel.LogVERBOSE)
-                  .WithAppVersion("1.0")
+                  .WithLogLevel(Flurry.LogLevel.VERBOSE)
+                  .WithMessaging(true)
+                  .WithPerformanceMetrics(Flurry.Performance.ALL)
                   .Build(FLURRY_API_KEY);
 
         // Example to get Flurry versions.
         Debug.Log("AgentVersion: " + Flurry.GetAgentVersion());
         Debug.Log("ReleaseVersion: " + Flurry.GetReleaseVersion());
 
-        // Set users preferences.
+        // Set user preferences.
         Flurry.SetAge(36);
         Flurry.SetGender(Flurry.Gender.Female);
         Flurry.SetReportLocation(true);
+  
+        // Set user properties.
+        Flurry.UserProperties.Set(Flurry.UserProperties.PROPERTY_REGISTERED_USER, "True");
+
+        // Set Messaging listener
+        Flurry.SetMessagingListener(new MyMessagingListener());
 
         // Log Flurry events.
         Flurry.EventRecordStatus status = Flurry.LogEvent("Unity Event");
@@ -59,7 +67,41 @@ public class FlurryStart : MonoBehaviour
         parameters.Add("Status", "Registered");
         status = Flurry.LogEvent("Unity Event Params Timed", parameters, true);
         Debug.Log("Log Unity Event with parameters timed status: " + status);
-
+        // ...
         Flurry.EndTimedEvent("Unity Event Params Timed");
+    }
+
+    public class MyMessagingListener : Flurry.IFlurryMessagingListener
+    {
+        // If you would like to handle the notification yourself, return true to notify Flurry
+        // you've handled it, and Flurry will not show the notification.
+        public bool OnNotificationReceived(Flurry.FlurryMessage message)
+        {
+            Debug.Log("Flurry Messaging Notification Received: " + message.Title);
+            return false;
+        }
+
+        // If you would like to handle the notification yourself, return true to notify Flurry
+        // you've handled it, and Flurry will not launch the app or "click_action" activity.
+        public bool OnNotificationClicked(Flurry.FlurryMessage message)
+        {
+            Debug.Log("Flurry Messaging Notification Clicked: " + message.Title);
+            return false;
+        }
+
+        public void OnNotificationCancelled(Flurry.FlurryMessage message)
+        {
+            Debug.Log("Flurry Messaging Notification Cancelled: " + message.Title);
+        }
+
+        public void OnTokenRefresh(string token)
+        {
+            Debug.Log("Flurry Messaging Token Refresh: " + token);
+        }
+
+        public void OnNonFlurryNotificationReceived(IDisposable nonFlurryMessage)
+        {
+            Debug.Log("Flurry Messaging Non-Flurry Notification.");
+        }
     }
 }
