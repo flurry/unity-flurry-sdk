@@ -1,5 +1,12 @@
 # Change Log
 
+## v3.1.0 (2020-09-21)
+
+#### Features
+
+* Upgrade Flurry Android SDK version to 12.7.0
+* Upgrade Flurry iOS SDK version to 11.1.0
+
 # v3.0.0 (2020-08-26)
 
 #### Features

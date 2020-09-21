@@ -16,7 +16,7 @@ A Unity plugin for Flurry SDK
 
 ## Installation
 
-1. Download the Flurry Unity package from [flurry-sdk-3.0.0.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-3.0.0.unitypackage), or [flurry-sdk-3.0.0-push.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-3.0.0-push.unitypackage) if you want to use Flurry Push.
+1. Download the Flurry Unity package from [flurry-sdk-3.1.0.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-3.1.0.unitypackage), or [flurry-sdk-3.1.0-push.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-3.1.0-push.unitypackage) if you want to use Flurry Push.
 2. Open your project in Unity Editor, choose menu **Assets** > **Import Package** > **Custom Package…** to bring up the File chooser, and select the package downloaded.
 3. Add Flurry code
 
@@ -171,8 +171,8 @@ See [Android](http://flurry.github.io/flurry-android-sdk/)-[(FlurryAgent)](http:
   Flurry.Builder WithContinueSessionMillis(long sessionMillis);
   Flurry.Builder WithIncludeBackgroundSessionsInMetrics(bool includeBackgroundSessionsInMetrics);
   Flurry.Builder WithLogEnabled(bool enableLog);
-  Flurry.Builder WithLogLevel(FlurrySDK.Flurry.LogLevel logLevel); // logLevel = { VERBOSE, DEBUG, INFO, WARN, ERROR, ASSERT }
-  Flurry.Builder.WithPerformanceMetrics(int performanceMetrics); // performanceMetrics = { Flurry.Performance.NONE, COLD_START, SCREEN_TIME, ALL }
+  Flurry.Builder WithLogLevel(Flurry.LogLevel logLevel); // LogLevel = { VERBOSE, DEBUG, INFO, WARN, ERROR, ASSERT }
+  Flurry.Builder.WithPerformanceMetrics(Flurry.Performance performanceMetrics); // Performance = { NONE, COLD_START, SCREEN_TIME, ALL }
   Flurry.Builder WithMessaging(bool enableMessaging);
   Flurry.Builder WithDataSaleOptOut(bool isOptOut);
   ```
@@ -181,7 +181,7 @@ See [Android](http://flurry.github.io/flurry-android-sdk/)-[(FlurryAgent)](http:
 
   ```c
   void SetAge(int age);
-  void SetGender(Flurry.Gender gender);
+  void SetGender(Flurry.Gender gender); // Gender = { Male, Female }
   void SetReportLocation(bool reportLocation);
   void SetSessionOrigin(string originName, string deepLink);
   void SetUserId(string userId);
@@ -253,7 +253,7 @@ See [Android](http://flurry.github.io/flurry-android-sdk/)-[(FlurryAgent)](http:
 
   ```c
   void UpdateConversionValue(int conversionValue)
-  void UpdateConversionValueWithEvent(FlurrySDK.Flurry.SKAdNetworkEvent flurryEvent); // flurryEvent = { NoEvent, Registration, Login, Subscription, InAppPurchase }
+  void UpdateConversionValueWithEvent(Flurry.SKAdNetworkEvent flurryEvent); // SKAdNetworkEvent = { NoEvent, Registration, Login, Subscription, InAppPurchase }
   ```
 
 - **Methods for Flurry Performance Metrics**
