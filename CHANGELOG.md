@@ -1,5 +1,14 @@
 # Change Log
 
+* [Flurry Android SDK Release Notes](https://developer.yahoo.com/flurry/docs/releasenotes/android/)
+* [Flurry iOS SDK Release Notes](https://developer.yahoo.com/flurry/docs/releasenotes/ios/)
+
+## v3.3.0 (2021-02-22)
+
+#### Features
+
+* Upgrade Flurry Android SDK version to 12.11.0
+
 ## v3.2.0 (2020-12-22)
 
 #### Features
