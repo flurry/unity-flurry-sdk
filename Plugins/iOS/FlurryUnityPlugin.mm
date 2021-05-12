@@ -65,9 +65,9 @@ static FlurryUnityPlugin *_sharedInstance;
     NSString* originName = @"unity-flurry-sdk";
     
     #if __has_include("FlurryMessaging.h")
-    NSString* originVersion = @"3.3.0.messaging";
+    NSString* originVersion = @"3.4.0.messaging";
     #else
-    NSString* originVersion = @"3.3.0";
+    NSString* originVersion = @"3.4.0";
     #endif
     
     

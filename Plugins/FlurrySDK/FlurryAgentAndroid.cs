@@ -27,7 +27,7 @@ namespace FlurrySDKInternal
         public static NetworkReachability internetReachability = Application.internetReachability;
 
         private static readonly string ORIGIN_NAME = "unity-flurry-sdk";
-        private static readonly string ORIGIN_VERSION = "3.3.0";
+        private static readonly string ORIGIN_VERSION = "3.4.0";
 
         private static AndroidJavaClass cls_FlurryAgent = new AndroidJavaClass("com.flurry.android.FlurryAgent");
         private static AndroidJavaClass cls_FlurryAgentConstants = new AndroidJavaClass("com.flurry.android.Constants");
