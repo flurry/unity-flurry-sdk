@@ -16,7 +16,7 @@ A Unity plugin for Flurry SDK
 
 ## Installation
 
-1. Download the Flurry Unity package from [flurry-sdk-3.4.0.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-3.4.0.unitypackage), or [flurry-sdk-3.4.0-push.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-3.4.0-push.unitypackage) if you want to use Flurry Push.
+1. Download the Flurry Unity package from [flurry-sdk-4.0.0.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-4.0.0.unitypackage), or [flurry-sdk-4.0.0-push.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-4.0.0-push.unitypackage) if you want to use Flurry Push.
    - If you are using Apple Xcode < 12, please use releases [flurry-sdk-3.3.0.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-3.3.0.unitypackage), or [flurry-sdk-3.3.0-push.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-3.3.0-push.unitypackage).
 2. Open your project in Unity Editor, choose menu **Assets** > **Import Package** > **Custom Package…** to bring up the File chooser, and select the package downloaded.
 3. Add Flurry code
@@ -93,9 +93,11 @@ public class FlurryStart : MonoBehaviour
                   .WithMessaging(true)
                   .Build(FLURRY_API_KEY);
 
-        // Example to get Flurry versions.
+        // Example to get Flurry versions and publisher segmentation.
         Debug.Log("AgentVersion: " + Flurry.GetAgentVersion());
         Debug.Log("ReleaseVersion: " + Flurry.GetReleaseVersion());
+        Flurry.SetPublisherSegmentationListener(new MyPublisherSegmentationListener());
+        Flurry.FetchPublisherSegmentation();
 
         // Set user preferences.
         Flurry.SetAge(36);
@@ -120,6 +122,28 @@ public class FlurryStart : MonoBehaviour
         Debug.Log("Log Unity Event with parameters timed status: " + status);
         ...
         Flurry.EndTimedEvent("Unity Event Params Timed");
+        
+        // Log Flurry standard events.
+        status = Flurry.LogEvent(Flurry.Event.APP_ACTIVATED);
+        Debug.Log("Log Unity Standard Event status: " + status);
+
+        Flurry.EventParams stdParams = new Flurry.EventParams()
+            .PutDouble (Flurry.EventParam.TOTAL_AMOUNT, 34.99)
+            .PutBoolean(Flurry.EventParam.SUCCESS, true)
+            .PutString (Flurry.EventParam.ITEM_NAME, "book 1")
+            .PutString ("note", "This is an awesome book to purchase !!!");
+        status = Flurry.LogEvent(Flurry.Event.PURCHASED, stdParams);
+        Debug.Log("Log Unity Standard Event with parameters status: " + status);
+    }
+
+    public class MyPublisherSegmentationListener : Flurry.IFlurryPublisherSegmentationListener
+    {
+        public void OnFetched(IDictionary<string, string> data)
+        {
+            string segments;
+            data.TryGetValue("segments", out segments);
+            Debug.Log("Flurry Publisher Segmentation Fetched: " + segments);
+        }
     }
 
     public class MyMessagingListener : Flurry.IFlurryMessagingListener
@@ -167,15 +191,15 @@ See [Android](http://flurry.github.io/flurry-android-sdk/)-[(FlurryAgent)](http:
 
   ```c
   void Build(string apiKey);
-  Flurry.Builder WithAppVersion(string appVersion); // iOS only. For Android, please use Flurry.setVersionName() instead.
-  Flurry.Builder WithCrashReporting(bool crashReporting);
-  Flurry.Builder WithContinueSessionMillis(long sessionMillis);
-  Flurry.Builder WithIncludeBackgroundSessionsInMetrics(bool includeBackgroundSessionsInMetrics);
-  Flurry.Builder WithLogEnabled(bool enableLog);
-  Flurry.Builder WithLogLevel(Flurry.LogLevel logLevel); // LogLevel = { VERBOSE, DEBUG, INFO, WARN, ERROR, ASSERT }
-  Flurry.Builder.WithPerformanceMetrics(Flurry.Performance performanceMetrics); // Performance = { NONE, COLD_START, SCREEN_TIME, ALL }
-  Flurry.Builder WithMessaging(bool enableMessaging);
-  Flurry.Builder WithDataSaleOptOut(bool isOptOut);
+  Builder WithAppVersion(string appVersion); // iOS only. For Android, please use Flurry.setVersionName() instead.
+  Builder WithCrashReporting(bool crashReporting);
+  Builder WithContinueSessionMillis(long sessionMillis);
+  Builder WithIncludeBackgroundSessionsInMetrics(bool includeBackgroundSessionsInMetrics);
+  Builder WithLogEnabled(bool enableLog);
+  Builder WithLogLevel(Flurry.LogLevel logLevel); // LogLevel = { VERBOSE, DEBUG, INFO, WARN, ERROR, ASSERT }
+  Builder WithPerformanceMetrics(Flurry.Performance performanceMetrics); // Performance = { NONE, COLD_START, SCREEN_TIME, ALL }
+  Builder WithMessaging(bool enableMessaging);
+  Builder WithDataSaleOptOut(bool isOptOut);
   ```
 
 - **Methods to set user preferences**
@@ -214,25 +238,36 @@ See [Android](http://flurry.github.io/flurry-android-sdk/)-[(FlurryAgent)](http:
   void Flag(string propertyName);
   ```
 
-- **Methods to get Flurry versions**
+- **Methods to get Flurry versions and publisher segmentation**
 
   ```c
   int GetAgentVersion();
   string GetReleaseVersion();
   string GetSessionId();
+  
+  IDictionary<string, string> GetPublisherSegmentation();
+  void FetchPublisherSegmentation();
+  void SetPublisherSegmentationListener(IFlurryPublisherSegmentationListener flurryPublisherSegmentationListener);
+
+  interface IFlurryPublisherSegmentationListener
+  {
+      void OnFetched(IDictionary<string, string> data);
+  }
   ```
 
 - **Methods to log Flurry events**
 
   ```c
-  Flurry.EventRecordStatus LogEvent(string eventId);
-  Flurry.EventRecordStatus LogEvent(string eventId, bool timed);
-  Flurry.EventRecordStatus LogEvent(string eventId, IDictionary<string, string> parameters);
-  Flurry.EventRecordStatus LogEvent(string eventId, IDictionary<string, string> parameters, bool timed);
+  EventRecordStatus LogEvent(string eventId);
+  EventRecordStatus LogEvent(string eventId, bool timed);
+  EventRecordStatus LogEvent(string eventId, IDictionary<string, string> parameters);
+  EventRecordStatus LogEvent(string eventId, IDictionary<string, string> parameters, bool timed);
 
   void EndTimedEvent(string eventId);
   void EndTimedEvent(string eventId, IDictionary<string, string> parameters);
 
+  EventRecordStatus LogEvent(Flurry.Event eventId, Flurry.EventParams parameters);
+  
   void OnPageView(); // Deprecated, API removed, no longer supported by Flurry.
 
   void OnError(string errorId, string message, string errorClass);
@@ -240,8 +275,30 @@ See [Android](http://flurry.github.io/flurry-android-sdk/)-[(FlurryAgent)](http:
 
   void LogBreadcrumb(string crashBreadcrumb);
   
-  Flurry.EventRecordStatus LogPayment(string productName, string productId, int quantity, double price,
-                                      string currency, string transactionId, IDictionary<string, string> parameters);
+  EventRecordStatus LogPayment(string productName, string productId, int quantity, double price,
+                               string currency, string transactionId, IDictionary<string, string> parameters);
+  ```
+
+- **Methods to set Flurry.EventParams**
+
+  ```c
+  EventParams EventParams();
+  EventParams EventParams(EventParams paramsSource);
+  IDictionary<object, string> GetParams();
+  EventParams Clear();
+  EventParams Remove(EventParamBase param);
+  EventParams Remove(string key);
+  EventParams PutAll(EventParams paramsSource);
+  EventParams PutString(StringEventParam param, string value);
+  EventParams PutString(string key, string value);
+  EventParams PutInteger(IntegerEventParam param, int value);
+  EventParams PutInteger(string key, int value);
+  EventParams PutLong(IntegerEventParam param, long value);
+  EventParams PutLong(string key, long value);
+  EventParams PutDouble(DoubleEventParam param, double value);
+  EventParams PutDouble(string key, double value);
+  EventParams PutBoolean(BooleanEventParam param, bool value);
+  EventParams PutBoolean(string key, bool value);
   ```
 
 - **Methods to enable IAP reporting (iOS)**

@@ -27,10 +27,12 @@ namespace FlurrySDKInternal
         public static NetworkReachability internetReachability = Application.internetReachability;
 
         private static readonly string ORIGIN_NAME = "unity-flurry-sdk";
-        private static readonly string ORIGIN_VERSION = "3.4.0";
+        private static readonly string ORIGIN_VERSION = "4.0.0";
 
         private static AndroidJavaClass cls_FlurryAgent = new AndroidJavaClass("com.flurry.android.FlurryAgent");
         private static AndroidJavaClass cls_FlurryAgentConstants = new AndroidJavaClass("com.flurry.android.Constants");
+        private static AndroidJavaClass cls_FlurryEvent = new AndroidJavaClass("com.flurry.android.FlurryEvent");
+        private static AndroidJavaClass cls_FlurryEventParam = new AndroidJavaClass("com.flurry.android.FlurryEvent$Param");
 
         public class AgentBuilderAndroid : AgentBuilder
         {
@@ -217,6 +219,27 @@ namespace FlurrySDKInternal
 
         }
 
+        class PublisherSegmentationCallback : AndroidJavaProxy
+        {
+            private readonly FlurrySDK.Flurry.IFlurryPublisherSegmentationListener publisherSegmentationListener;
+
+            public PublisherSegmentationCallback(FlurrySDK.Flurry.IFlurryPublisherSegmentationListener flurryMessagingListener)
+                : base("com.flurry.android.FlurryPublisherSegmentation$FetchListener")
+            {
+                publisherSegmentationListener = flurryMessagingListener;
+            }
+
+#pragma warning disable IDE1006 // Naming Styles
+
+            void onFetched(AndroidJavaObject flurryPublisherSegmentation)
+            {
+                publisherSegmentationListener.OnFetched(ConvertToDictionary<string, string>(flurryPublisherSegmentation));
+            }
+
+#pragma warning restore IDE1006 // Naming Styles
+
+        }
+
         public override void SetAge(int age)
         {
             cls_FlurryAgent.CallStatic("setAge", age);
@@ -250,16 +273,6 @@ namespace FlurrySDKInternal
             cls_FlurryAgent.CallStatic("setVersionName", versionName);
         }
 
-        public override void SetDataSaleOptOut(bool isOptOut)
-        {
-            cls_FlurryAgent.CallStatic("setDataSaleOptOut", isOptOut);
-        }
-
-        public override void DeleteData()
-        {
-            cls_FlurryAgent.CallStatic("deleteData");
-        }
-
         public override void AddOrigin(string originName, string originVersion)
         {
             cls_FlurryAgent.CallStatic("addOrigin", originName, originVersion);
@@ -275,20 +288,51 @@ namespace FlurrySDKInternal
             cls_FlurryAgent.CallStatic("addSessionProperty", name, value);
         }
 
-        public override void SetMessagingListener(FlurrySDK.Flurry.IFlurryMessagingListener flurryMessagingListener)
+        public override void SetDataSaleOptOut(bool isOptOut)
         {
-            Debug.Log("To enable Flurry Messaging for Android, please remember to update your AndroidManifest.xml to setup the Messaging.");
+            cls_FlurryAgent.CallStatic("setDataSaleOptOut", isOptOut);
+        }
 
-            if (flurryMessagingListener != null)
+        public override void DeleteData()
+        {
+            cls_FlurryAgent.CallStatic("deleteData");
+        }
+
+        public override void OpenPrivacyDashboard()
+        {
+            using (AndroidJavaClass cls_UnityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
             {
-                try
+                using (AndroidJavaObject obj_Activity = cls_UnityPlayer.GetStatic<AndroidJavaObject>("currentActivity"))
                 {
-                    AndroidJavaClass cls_FlurryApplication = new AndroidJavaClass("com.flurry.android.FlurryUnityApplication");
-                    cls_FlurryApplication.CallStatic("withFlurryMessagingListener", new MessagingCallback(flurryMessagingListener));
-                } catch(AndroidJavaException) {
-                    Debug.Log("To enable Flurry Messaging for Android, please remember to include Flurry Marketing libraries.");
+                    AndroidJavaObject obj_Request = new AndroidJavaObject("com.flurry.android.FlurryPrivacySession$Request",
+                        obj_Activity, new PrivacySessionCallback());
+                    cls_FlurryAgent.CallStatic("openPrivacyDashboard", obj_Request);
                 }
             }
+        }
+
+        class PrivacySessionCallback : AndroidJavaProxy
+        {
+            public PrivacySessionCallback()
+                : base("com.flurry.android.FlurryPrivacySession$Callback")
+            {
+                // no-op
+            }
+
+#pragma warning disable IDE1006 // Naming Styles
+
+            void success()
+            {
+                // no-op
+            }
+
+            void failure()
+            {
+                // no-op
+            }
+
+#pragma warning restore IDE1006 // Naming Styles
+
         }
 
         public override int GetAgentVersion()
@@ -340,6 +384,37 @@ namespace FlurrySDKInternal
             cls_FlurryAgent.CallStatic("endTimedEvent", eventId, ConvertToMap(parameters));
         }
 
+        public override int LogEvent(FlurrySDK.Flurry.Event eventId, FlurrySDK.Flurry.EventParams parameters)
+        {
+            AndroidJavaObject javaEventId = cls_FlurryEvent.GetStatic<AndroidJavaObject>(eventId.ToString());
+            AndroidJavaObject result = cls_FlurryAgent.CallStatic<AndroidJavaObject>("logEvent",
+                                                                 javaEventId, ConvertToEventParams(parameters));
+            return result.Call<int>("ordinal");
+        }
+
+        private static AndroidJavaObject ConvertToEventParams(FlurrySDK.Flurry.EventParams parameters)
+        {
+            AndroidJavaObject obj_EventParams = new AndroidJavaObject("com.flurry.android.FlurryEvent$Params");
+            if (parameters != null)
+            {
+                IDictionary<object, string> dictionary = parameters.GetParams();
+                AndroidJavaObject obj_HashMap = obj_EventParams.Call<AndroidJavaObject>("getParams");
+                foreach (KeyValuePair<object, string> pair in dictionary)
+                {
+                    if (pair.Key is FlurrySDK.Flurry.EventParamBase)
+                    {
+                        AndroidJavaObject javaEventParam = cls_FlurryEventParam.GetStatic<AndroidJavaObject>(pair.Key.ToString());
+                        obj_HashMap.Call<AndroidJavaObject>("put", javaEventParam, pair.Value);
+                    } else
+                    {
+                        obj_HashMap.Call<AndroidJavaObject>("put", pair.Key, pair.Value);
+                    }
+                }
+            }
+
+            return obj_EventParams;
+        }
+
         public override void OnPageView()
         {
             Debug.Log("Deprecated API OnPageView removed.");
@@ -387,40 +462,44 @@ namespace FlurrySDKInternal
            Debug.Log("UpdateConversionValueWithEvent is for iOS only.");
         }
 
-        class PrivacySessionCallback : AndroidJavaProxy
+        public override void SetMessagingListener(FlurrySDK.Flurry.IFlurryMessagingListener flurryMessagingListener)
         {
-            public PrivacySessionCallback()
-                : base("com.flurry.android.FlurryPrivacySession$Callback")
+            Debug.Log("To enable Flurry Messaging for Android, please remember to update your AndroidManifest.xml to setup the Messaging.");
+
+            if (flurryMessagingListener != null)
             {
-                // no-op
+                try
+                {
+                    AndroidJavaClass cls_FlurryApplication = new AndroidJavaClass("com.flurry.android.FlurryUnityApplication");
+                    cls_FlurryApplication.CallStatic("withFlurryMessagingListener", new MessagingCallback(flurryMessagingListener));
+                }
+                catch (AndroidJavaException)
+                {
+                    Debug.Log("To enable Flurry Messaging for Android, please remember to include Flurry Marketing libraries.");
+                }
             }
-
-#pragma warning disable IDE1006 // Naming Styles
-
-            void success()
-            {
-                // no-op
-            }
-
-            void failure()
-            {
-                // no-op
-            }
-
-#pragma warning restore IDE1006 // Naming Styles
-
         }
 
-        public override void OpenPrivacyDashboard()
+        public override IDictionary<string, string> GetPublisherSegmentation()
         {
-            using (AndroidJavaClass cls_UnityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+            AndroidJavaClass cls_FlurryPublisherSegmentation = new AndroidJavaClass("com.flurry.android.FlurryPublisherSegmentation");
+            AndroidJavaObject data = cls_FlurryPublisherSegmentation.CallStatic<AndroidJavaObject>("getPublisherData");
+
+            return ConvertToDictionary<string, string>(data);
+        }
+
+        public override void FetchPublisherSegmentation()
+        {
+            AndroidJavaClass cls_FlurryPublisherSegmentation = new AndroidJavaClass("com.flurry.android.FlurryPublisherSegmentation");
+            cls_FlurryPublisherSegmentation.CallStatic("fetch");
+        }
+
+        public override void SetPublisherSegmentationListener(FlurrySDK.Flurry.IFlurryPublisherSegmentationListener flurryPublisherSegmentationListener)
+        {
+            if (flurryPublisherSegmentationListener != null)
             {
-                using (AndroidJavaObject obj_Activity = cls_UnityPlayer.GetStatic<AndroidJavaObject>("currentActivity"))
-                {
-                    AndroidJavaObject obj_Request = new AndroidJavaObject("com.flurry.android.FlurryPrivacySession$Request",
-                        obj_Activity, new PrivacySessionCallback());
-                    cls_FlurryAgent.CallStatic("openPrivacyDashboard", obj_Request);
-                }
+                AndroidJavaClass cls_FlurryPublisherSegmentation = new AndroidJavaClass("com.flurry.android.FlurryPublisherSegmentation");
+                cls_FlurryPublisherSegmentation.CallStatic("registerFetchListener", new PublisherSegmentationCallback(flurryPublisherSegmentationListener));
             }
         }
 
@@ -455,13 +534,16 @@ namespace FlurrySDKInternal
         private static IDictionary<TKey, TValue> ConvertToDictionary<TKey, TValue>(AndroidJavaObject map)
         {
             IDictionary<TKey, TValue> dictionary = new Dictionary<TKey, TValue>();
-            AndroidJavaObject entrySet = map.Call<AndroidJavaObject>("entrySet");
-            AndroidJavaObject[] entryArray = entrySet.Call<AndroidJavaObject[]>("toArray");
-            foreach (AndroidJavaObject entry in entryArray)
+            if (map != null)
             {
-                TKey key = entry.Call<TKey>("getKey");
-                TValue value = entry.Call<TValue>("getValue");
-                dictionary.Add(key, value);
+                AndroidJavaObject entrySet = map.Call<AndroidJavaObject>("entrySet");
+                AndroidJavaObject[] entryArray = entrySet.Call<AndroidJavaObject[]>("toArray");
+                foreach (AndroidJavaObject entry in entryArray)
+                {
+                    TKey key = entry.Call<TKey>("getKey");
+                    TValue value = entry.Call<TValue>("getValue");
+                    dictionary.Add(key, value);
+                }
             }
             return dictionary;
         }

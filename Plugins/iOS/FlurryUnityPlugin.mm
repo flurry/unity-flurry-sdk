@@ -16,6 +16,7 @@
 
 #import "FlurryUnityPlugin.h"
 #import "Flurry.h"
+#import "Flurry+Event.h"
 #import "FlurryCCPA.h"
 #import "FlurryUserProperties.h"
 
@@ -26,6 +27,10 @@
 #if __has_include(<StoreKit/SKAdNetwork.h>)
 #import "FlurrySKAdNetwork.h"
 #endif
+
+// typedef void (*onFetchedHandler) (const char *data);
+typedef void (*OnFetched) (const char *data);
+static OnFetched onFetchedBlock;
 
 @implementation FlurryUnityPlugin
 
@@ -65,9 +70,9 @@ static FlurryUnityPlugin *_sharedInstance;
     NSString* originName = @"unity-flurry-sdk";
     
     #if __has_include("FlurryMessaging.h")
-    NSString* originVersion = @"3.4.0.messaging";
+    NSString* originVersion = @"4.0.0.messaging";
     #else
-    NSString* originVersion = @"3.4.0";
+    NSString* originVersion = @"4.0.0";
     #endif
     
     
@@ -78,6 +83,15 @@ static FlurryUnityPlugin *_sharedInstance;
     //NSLog(@"IDFV = %@", idfv);
     
 };
+
+- (void)onFetched:(NSDictionary<NSString *, NSString *> *_Nullable)publisherData{
+    NSLog(@"onFetched native callback= %@", publisherData);
+    if(publisherData){
+        onFetchedBlock(strDup([dictionaryToNSString(publisherData) UTF8String]));
+    }else{
+        onFetchedBlock("");
+    }
+}
 
 #if __has_include("FlurryMessaging.h")
 -(void) didReceiveMessage:(nonnull FlurryMessage*)message {
@@ -140,6 +154,21 @@ NSArray* cStringToArray(const char* values) {
     NSArray* valuesArray = [strToNSStr(values) componentsSeparatedByString : @"\n"];
     
     return valuesArray;
+}
+
+NSString* dictionaryToNSString(NSDictionary<NSString *, NSString *> *dict){
+    NSMutableString *mutableStr = [NSMutableString new];
+    for(NSString *key in [dict allKeys]){
+        NSString *val = dict[key];
+        [mutableStr appendString:key];
+        [mutableStr appendString:@":"];
+        [mutableStr appendString:val];
+        [mutableStr appendString:@";"];
+    }
+    if([mutableStr length] > 0){
+        [mutableStr deleteCharactersInRange:NSMakeRange([mutableStr length] - 1, 1)];
+    }
+    return [mutableStr copy];
 }
 
 extern "C" {
@@ -232,6 +261,128 @@ extern "C" {
         return [Flurry logEvent:eventNameStr withParameters:keyValueToDict(keys,values) timed:isTimed];
     }
     
+    const int flurryLogStandardEventWithParameter(const char* eventName, const char* keys, const char* values){
+        NSString *eventNameStr = strToNSStr(eventName);
+        NSMutableDictionary *tmpParam = keyValueToDict(keys,values);
+        
+        NSDictionary *eventIdStringMap = @{
+              @"AD_CLICK":@(0),
+              @"AD_IMPRESSION":@(1),
+              @"AD_REWARDED":@(2),
+              @"AD_SKIPPED":@(3),
+              @"CREDITS_SPENT":@(4),
+              @"CREDITS_PURCHASED":@(5),
+              @"CREDITS_EARNED":@(6),
+              @"ACHIEVEMENT_UNLOCKED":@(7),
+              @"LEVEL_COMPLETED":@(8),
+              @"LEVEL_FAILED":@(9),
+              @"LEVEL_UP":@(10),
+              @"LEVEL_STARTED":@(11),
+              @"LEVEL_SKIP":@(12),
+              @"SCORE_POSTED":@(13),
+              @"CONTENT_RATED":@(14),
+              @"CONTENT_VIEWED":@(15),
+              @"CONTENT_SAVED":@(16),
+              @"PRODUCT_CUSTOMIZED":@(17),
+              @"APP_ACTIVATED":@(18),
+              @"APPLICATION_SUBMITTED":@(19),
+              @"ADD_ITEM_TO_CART":@(20),
+              @"ADD_ITEM_TO_WISH_LIST":@(21),
+              @"COMPLETED_CHECKOUT":@(22),
+              @"PAYMENT_INFO_ADDED":@(23),
+              @"ITEM_VIEWED":@(24),
+              @"ITEM_LIST_VIEWED":@(25),
+              @"PURCHASED":@(26),
+              @"PURCHASE_REFUNDED":@(27),
+              @"REMOVE_ITEM_FROM_CART":@(28),
+              @"CHECKOUT_INITIATED":@(29),
+              @"FUNDS_DONATED":@(30),
+              @"USER_SCHEDULED":@(31),
+              @"OFFER_PRESENTED":@(32),
+              @"SUBSCRIPTION_STARTED":@(33),
+              @"SUBSCRIPTION_ENDED":@(34),
+              @"GROUP_JOINED":@(35),
+              @"GROUP_LEFT":@(36),
+              @"TUTORIAL_STARTED":@(37),
+              @"TUTORIAL_COMPLETED":@(38),
+              @"TUTORIAL_STEP_COMPLETED":@(39),
+              @"TUTORIAL_SKIPPED":@(40),
+              @"LOGIN":@(41),
+              @"LOGOUT":@(42),
+              @"USER_REGISTERED":@(43),
+              @"SEARCH_RESULT_VIEWED":@(44),
+              @"KEYWORD_SEARCHED":@(45),
+              @"LOCATION_SEARCHED":@(46),
+              @"INVITE":@(47),
+              @"SHARE":@(48),
+              @"LIKE":@(49),
+              @"COMMENT":@(50),
+              @"MEDIA_CAPTURED":@(51),
+              @"MEDIA_STARTED":@(52),
+              @"MEDIA_STOPPED":@(53),
+              @"MEDIA_PAUSED":@(54),
+              @"PRIVACY_PROMPT_DISPLAYED":@(55),
+              @"PRIVACY_OPT_IN":@(56),
+              @"PRIVACY_OPT_OUT":@(57)
+        };
+        
+        NSDictionary *eventParamStringMap = @{
+            @"AD_TYPE" : @"fl.ad.type",
+            @"LEVEL_NAME" : @"fl.level.name",
+            @"LEVEL_NUMBER" : @"fl.level.number",
+            @"CONTENT_NAME" : @"fl.content.name",
+            @"CONTENT_TYPE" : @"fl.content.type",
+            @"CONTENT_ID" : @"fl.content.id",
+            @"CREDIT_NAME" : @"fl.credit.name",
+            @"CREDIT_TYPE" : @"fl.credit.type",
+            @"CREDIT_ID" : @"fl.credit.id",
+            @"IS_CURRENCY_SOFT" : @"fl.is.currency.soft",
+            @"CURRENCY_TYPE" : @"fl.currency.type",
+            @"PAYMENT_TYPE" : @"fl.payment.type",
+            @"ITEM_NAME" : @"fl.item.name",
+            @"ITEM_TYPE" : @"fl.item.type",
+            @"ITEM_ID" : @"fl.item.id",
+            @"ITEM_COUNT" : @"fl.item.count",
+            @"ITEM_CATEGORY" : @"fl.item.category",
+            @"ITEM_LIST_TYPE" : @"fl.item.list.type",
+            @"PRICE" : @"fl.price",
+            @"TOTAL_AMOUNT" : @"fl.total.amount",
+            @"ACHIEVEMENT_ID" : @"fl.achievement.id",
+            @"SCORE" : @"fl.score",
+            @"RATING" : @"fl.rating",
+            @"TRANSACTION_ID" : @"fl.transaction.id",
+            @"SUCCESS" : @"fl.success",
+            @"IS_ANNUAL_SUBSCRIPTION" : @"fl.is.annual.subscription",
+            @"SUBSCRIPTION_COUNTRY" : @"fl.subscription.country",
+            @"TRIAL_DAYS" : @"fl.trial.days",
+            @"PREDICTED_LTV" : @"fl.predicted.ltv",
+            @"GROUP_NAME" : @"fl.group.name",
+            @"TUTORIAL_NAME" : @"fl.tutorial.name",
+            @"STEP_NUMBER" : @"fl.step.number",
+            @"USER_ID" : @"fl.user.id",
+            @"METHOD" : @"fl.method",
+            @"QUERY" : @"fl.query",
+            @"SEARCH_TYPE" : @"fl.search.type",
+            @"SOCIAL_CONTENT_NAME" : @"fl.social.content.name",
+            @"SOCIAL_CONTENT_ID" : @"fl.social.content.id",
+            @"LIKE_TYPE" : @"fl.like.type",
+            @"MEDIA_NAME" : @"fl.media.name",
+            @"MEDIA_TYPE" : @"fl.media.type",
+            @"MEDIA_ID" : @"fl.media.id",
+            @"DURATION" : @"fl.duration",
+        };
+        
+        int eventId = [eventIdStringMap[eventNameStr] intValue];
+        FlurryParamBuilder *builder = [FlurryParamBuilder new];
+        for(NSString *key in [tmpParam allKeys]){
+            if(eventParamStringMap[key] != nil){
+                [builder setString: tmpParam[key] forKey: eventParamStringMap[key]];
+            }else{
+                [builder setString: tmpParam[key] forKey:key];
+            }
+        }
+        return [Flurry logStandardEvent:(FlurryEvent)eventId withParameters:builder];
+    }
     const void flurrySetUserId(const char* userId) {
         NSString *userIdStr = strToNSStr(userId);
         [Flurry setUserID:userIdStr];
@@ -385,6 +536,26 @@ extern "C" {
     
     const void flurryFlagUserProperty(const char* propertyName){
         [FlurryUserProperties flag:strToNSStr(propertyName)];
+    }
+    
+    const void flurryFetchPublisherSegmentation(){
+        [Flurry fetch];
+    }
+    
+    const void flurrySetPublisherSegmentationListener(){
+        FlurryUnityPlugin* sharedInstance = [FlurryUnityPlugin shared];
+        [Flurry registerFetchObserver:sharedInstance withExecutionQueue:dispatch_get_main_queue()];
+    }
+    
+    const char* flurryGetPublisherData(){
+        NSDictionary<NSString *, NSString *> *data = [Flurry getPublisherData];
+        return strDup([dictionaryToNSString(data) UTF8String]);
+    }
+    
+    
+    void flurryRegisterOnFetchedCallback(OnFetched handler)
+    {
+        onFetchedBlock = handler;
     }
 }
 

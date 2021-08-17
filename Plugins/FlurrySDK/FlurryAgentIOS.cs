@@ -19,12 +19,15 @@ using System.Text;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
+using AOT;
 
 #if UNITY_IPHONE
 namespace FlurrySDKInternal
 {
     public class FlurryAgentIOS : FlurryAgent
     {
+        static FlurrySDK.Flurry.IFlurryPublisherSegmentationListener _flurryPublisherSegmentationListener;
+
         public FlurryAgentIOS()
         {
             Debug.Log("FlurryAgentIOS instance created");
@@ -34,25 +37,25 @@ namespace FlurrySDKInternal
         private static extern void initializeFlurrySessionBuilder();
 
         [DllImport("__Internal")]
+        private static extern void flurryWithAppVersion(string appVersion);
+
+        [DllImport("__Internal")]
         private static extern void flurryWithCrashReporting(bool crashReporting);
-
-        [DllImport("__Internal")]
-        private static extern void flurryWithDataSaleOptOut(bool isOptOut);
-
-        [DllImport("__Internal")]
-        private static extern void flurryWithLogLevel(int logLevel);
-
-        [DllImport("__Internal")]
-        private static extern void flurryWithLogEnabled(bool logEnabled);
 
         [DllImport("__Internal")]
         private static extern void flurryWithSessionContinueSeconds(long sessionMillis);
 
         [DllImport("__Internal")]
-        private static extern void flurryWithAppVersion(string appVersion);
+        private static extern void flurryWithIncludeBackgroundSessionsInMetrics(bool includeBackgroundSessionsInMetrics);
 
         [DllImport("__Internal")]
-        private static extern void flurryWithIncludeBackgroundSessionsInMetrics(bool includeBackgroundSessionsInMetrics);
+        private static extern void flurryWithLogEnabled(bool logEnabled);
+
+        [DllImport("__Internal")]
+        private static extern void flurryWithLogLevel(int logLevel);
+
+        [DllImport("__Internal")]
+        private static extern void flurryWithDataSaleOptOut(bool isOptOut);
 
         [DllImport("__Internal")]
         private static extern void flurrySetupMessagingWithAutoIntegration();
@@ -61,19 +64,55 @@ namespace FlurrySDKInternal
         private static extern void flurryStartSessionWithSessionBuilder(string apiKey);
        
         [DllImport("__Internal")]
+        private static extern void flurrySetAge(int age);
+
+        [DllImport("__Internal")]
+        private static extern void flurrySetGender(string gender);
+
+        [DllImport("__Internal")]
+        private static extern void flurrySetSessionOrigin(string originName, string deepLink);
+
+        [DllImport("__Internal")]
+        private static extern void flurrySetUserId(string userId);
+
+        [DllImport("__Internal")]
+        private static extern void flurrySetVersionName(string versionName);
+
+        [DllImport("__Internal")]
+        private static extern void flurryAddOrigin(string originName, string originVersion);
+
+        [DllImport("__Internal")]
+        private static extern void flurryAddOriginWithParams(string originName, string originVersion, string keys, string values);
+
+        [DllImport("__Internal")]
+        private static extern void flurryAddSessionProperty(string name, string value);
+
+        [DllImport("__Internal")]
         private static extern void flurrySetDataSaleOptOut(bool isOptOut);
 
         [DllImport("__Internal")]
         private static extern void flurrySetDelete();
 
         [DllImport("__Internal")]
+        private static extern void flurryOpenPrivacyDashboard();
+
+        [DllImport("__Internal")]
+        private static extern string flurryGetAgentVersion();
+
+        [DllImport("__Internal")]
+        private static extern void flurryGetReleaseVersion();
+
+        [DllImport("__Internal")]
+        private static extern string flurryGetSessionId();
+
+        [DllImport("__Internal")]
         private static extern int flurryLogEvent(string eventId);
 
         [DllImport("__Internal")]
-        private static extern int flurryLogEventWithParameter(string eventName, string keys, string values);
+        private static extern int flurryLogTimedEvent(string eventId, bool isTimed);
 
         [DllImport("__Internal")]
-        private static extern int flurryLogTimedEvent(string eventId, bool isTimed);
+        private static extern int flurryLogEventWithParameter(string eventName, string keys, string values);
 
         [DllImport("__Internal")]
         private static extern int flurryLogTimedEventWithParams(string eventId, string keys, string values, bool isTimed);
@@ -85,13 +124,7 @@ namespace FlurrySDKInternal
         private static extern void flurryEndTimedEventWithParams(string eventId, string keys, string values);
         
         [DllImport("__Internal")]
-        private static extern void flurrySetUserId(string userId);
-
-        [DllImport("__Internal")]
-        private static extern void flurrySetAge(int age);
-
-        [DllImport("__Internal")]
-        private static extern void flurrySetGender(string gender);
+        private static extern int flurryLogStandardEventWithParameter(string eventName, string keys, string values);
 
         [DllImport("__Internal")]
         private static extern void flurryLogPageView();
@@ -101,30 +134,6 @@ namespace FlurrySDKInternal
 
         [DllImport("__Internal")]
         private static extern void flurryLogErrorWithParams(string errorId, string message, string errorClass, string keys, string values);
-
-        [DllImport("__Internal")]
-        private static extern void flurryAddOrigin(string originName, string originVersion);
-
-        [DllImport("__Internal")]
-        private static extern void flurrySetSessionOrigin(string originName, string deepLink);
-
-        [DllImport("__Internal")]
-        private static extern void flurrySetVersionName(string versionName);
-
-        [DllImport("__Internal")]
-        private static extern void flurryAddSessionProperty(string name, string value);
-
-        [DllImport("__Internal")]
-        private static extern void flurryAddOriginWithParams(string originName, string originVersion, string keys, string values);
-
-        [DllImport("__Internal")]
-        private static extern string flurryGetAgentVersion();
-
-        [DllImport("__Internal")]
-        private static extern void flurryGetReleaseVersion();
-
-        [DllImport("__Internal")]
-        private static extern string flurryGetSessionId();
 
         [DllImport("__Internal")]
         private static extern void flurryLogBreadcrumb(string crashBreadcrumb);
@@ -137,9 +146,6 @@ namespace FlurrySDKInternal
 
         [DllImport("__Internal")]
         private static extern void flurryUpdateConversionValueWithEvent(int flurryEvent);
-
-        [DllImport("__Internal")]
-        private static extern void flurryOpenPrivacyDashboard();
 
         [DllImport("__Internal")]
         private static extern void flurrySetUserPropertyValue(string propertyName, string propertyValue);
@@ -165,57 +171,22 @@ namespace FlurrySDKInternal
         [DllImport("__Internal")]
         private static extern void flurryFlagUserProperty(string propertyName);
 
-        public class AgentUserPropertiesIOS : AgentUserProperties
-        {
-            public override void Set(string propertyName, string propertyValue)
-            {
-                flurrySetUserPropertyValue(propertyName, propertyValue);
-            }
+        [DllImport("__Internal")]
+        private static extern void flurryFetchPublisherSegmentation();
 
-            public override void Set(string propertyName, List<string> propertyValues)
-            {
-                string values;
-                values = String.Join("\n", propertyValues);
+        [DllImport("__Internal")]
+        private static extern void flurrySetPublisherSegmentationListener();
 
-                flurrySetUserPropertyValues(propertyName, values);
-            }
+        [DllImport("__Internal")]
+        private static extern string flurryGetPublisherData();
 
-            public override void Add(string propertyName, string propertyValue)
-            {
-                flurryAddUserPropertyValue(propertyName, propertyValue);
-            }
+        [DllImport("__Internal")]
+        public static extern void flurryRegisterOnFetchedCallback(IntPtr handler);    
+        
+        //declare method marked with delegate indicating this is a callback
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate void OnFetched(string data);
 
-            public override void Add(string propertyName, List<string> propertyValues)
-            {
-                string values;
-                values = String.Join("\n", propertyValues);
-
-                flurryAddUserPropertyValues(propertyName, values);
-            }
-
-            public override void Remove(string propertyName, string propertyValue)
-            {
-                flurryRemoveUserPropertyValue(propertyName, propertyValue);
-            }
-
-            public override void Remove(string propertyName, List<string> propertyValues)
-            {
-                string values;
-                values = String.Join("\n", propertyValues);
-
-                flurryRemoveUserPropertyValues(propertyName, values);
-            }
-
-            public override void Remove(string propertyName)
-            {
-                flurryRemoveUserProperty(propertyName);
-            }
-
-            public override void Flag(string propertyName)
-            {
-                flurryFlagUserProperty(propertyName);
-            }
-        }
 
         public class AgentBuilderIOS : AgentBuilder
         {
@@ -279,6 +250,58 @@ namespace FlurrySDKInternal
             }
         }
 
+        public class AgentUserPropertiesIOS : AgentUserProperties
+        {
+            public override void Set(string propertyName, string propertyValue)
+            {
+                flurrySetUserPropertyValue(propertyName, propertyValue);
+            }
+
+            public override void Set(string propertyName, List<string> propertyValues)
+            {
+                string values;
+                values = String.Join("\n", propertyValues);
+
+                flurrySetUserPropertyValues(propertyName, values);
+            }
+
+            public override void Add(string propertyName, string propertyValue)
+            {
+                flurryAddUserPropertyValue(propertyName, propertyValue);
+            }
+
+            public override void Add(string propertyName, List<string> propertyValues)
+            {
+                string values;
+                values = String.Join("\n", propertyValues);
+
+                flurryAddUserPropertyValues(propertyName, values);
+            }
+
+            public override void Remove(string propertyName, string propertyValue)
+            {
+                flurryRemoveUserPropertyValue(propertyName, propertyValue);
+            }
+
+            public override void Remove(string propertyName, List<string> propertyValues)
+            {
+                string values;
+                values = String.Join("\n", propertyValues);
+
+                flurryRemoveUserPropertyValues(propertyName, values);
+            }
+
+            public override void Remove(string propertyName)
+            {
+                flurryRemoveUserProperty(propertyName);
+            }
+
+            public override void Flag(string propertyName)
+            {
+                flurryFlagUserProperty(propertyName);
+            }
+        }
+
         public class AgentPerformanceIOS : AgentPerformance
         {
             public override void ReportFullyDrawn()
@@ -295,21 +318,6 @@ namespace FlurrySDKInternal
             {
                 Debug.Log("Flurry iOS SDK does not implement LogResourceLogger method.");
             }
-        }
-
-        public override void SetMessagingListener(FlurrySDK.Flurry.IFlurryMessagingListener flurryMessagingListener)
-        {
-            Debug.Log("iOS does not make use of the flurryMessagingListener. This is handled by delegate methods didReceiveMessage and didReceiveActionWithIdentifier in FlurryUnityPlugin.mm");
-        }
-
-        public override void SetDataSaleOptOut(bool isOptOut)
-        {
-           flurrySetDataSaleOptOut(isOptOut);
-        }
-
-        public override void DeleteData()
-        {
-            flurrySetDelete();
         }
 
         public override void SetAge(int age)
@@ -366,6 +374,21 @@ namespace FlurrySDKInternal
             flurryAddSessionProperty(name, value);
         }
 
+        public override void SetDataSaleOptOut(bool isOptOut)
+        {
+           flurrySetDataSaleOptOut(isOptOut);
+        }
+
+        public override void DeleteData()
+        {
+            flurrySetDelete();
+        }
+
+        public override void OpenPrivacyDashboard()
+        {
+            flurryOpenPrivacyDashboard();
+        }
+
         public override int GetAgentVersion()
         {
             string agentVersionStr = flurryGetAgentVersion();
@@ -391,17 +414,17 @@ namespace FlurrySDKInternal
             return (int) flurryLogEvent(eventId);
         }
 
+        public override int LogEvent(string eventId, bool timed)
+        {
+            return (int) flurryLogTimedEvent(eventId, timed);
+        }
+
         public override int LogEvent(string eventId, IDictionary<string, string> parameters)
         {
             string keys, values;
             ToKeyValue(parameters, out keys, out values);
 
             return (int) flurryLogEventWithParameter(eventId, keys, values);
-        }
-
-        public override int LogEvent(string eventId, bool timed)
-        {
-            return (int) flurryLogTimedEvent(eventId, timed);
         }
 
         public override int LogEvent(string eventId, IDictionary<string, string> parameters, bool timed)
@@ -421,6 +444,33 @@ namespace FlurrySDKInternal
             string keys, values;
             ToKeyValue(parameters, out keys, out values);
             flurryEndTimedEventWithParams(eventId, keys, values);
+        }
+
+        public override int LogEvent(FlurrySDK.Flurry.Event eventId, FlurrySDK.Flurry.EventParams parameters)
+        {
+            string nativeEventId = eventId.ToString();
+            IDictionary<string, string> newParameters = new Dictionary<string, string>();
+            if (parameters != null)
+            {
+                IDictionary<object, string> dictionary = parameters.GetParams();
+                foreach (KeyValuePair<object, string> pair in dictionary)
+                {
+                    string nativeEventParamValue = pair.Value;
+                    string nativeEventParamKey;
+                    if (pair.Key is FlurrySDK.Flurry.EventParamBase)
+                    {
+                        nativeEventParamKey = pair.Key.ToString();
+                    }
+                    else
+                    {
+                        nativeEventParamKey = (string) pair.Key;
+                    }
+                    newParameters.Add(nativeEventParamKey, nativeEventParamValue);
+                }
+            }
+            string keys, values;
+            ToKeyValue(newParameters, out keys, out values);
+            return (int) flurryLogStandardEventWithParameter(nativeEventId, keys, values);
         }
 
         public override void OnPageView()
@@ -452,6 +502,11 @@ namespace FlurrySDKInternal
             return 1;
         }
 
+        public override void SetIAPReportingEnabled(bool enableIAP)
+        {
+            flurrySetIAPReportingEnabled(enableIAP);
+        }
+
         public override void UpdateConversionValue(int conversionValue)
         {
            flurryUpdateConversionValue(conversionValue);
@@ -462,14 +517,46 @@ namespace FlurrySDKInternal
            flurryUpdateConversionValueWithEvent((int)flurryEvent);
         }
 
-        public override void OpenPrivacyDashboard()
+        public override void SetMessagingListener(FlurrySDK.Flurry.IFlurryMessagingListener flurryMessagingListener)
         {
-            flurryOpenPrivacyDashboard();
+            Debug.Log("iOS does not make use of the flurryMessagingListener. This is handled by delegate methods didReceiveMessage and didReceiveActionWithIdentifier in FlurryUnityPlugin.mm");
         }
 
-        public override void SetIAPReportingEnabled(bool enableIAP)
+        public override IDictionary<string, string> GetPublisherSegmentation()
         {
-            flurrySetIAPReportingEnabled(enableIAP);
+            string rawString = flurryGetPublisherData();
+            IDictionary<string, string> map = new Dictionary<string, string>();
+            ToDictionary(rawString, out map);
+            return map;
+        }
+
+        public override void FetchPublisherSegmentation()
+        {
+            flurryFetchPublisherSegmentation();
+        }
+
+        public override void SetPublisherSegmentationListener(FlurrySDK.Flurry.IFlurryPublisherSegmentationListener flurryPublisherSegmentationListener)
+        {
+            _flurryPublisherSegmentationListener = flurryPublisherSegmentationListener;
+            // create function ptr
+            OnFetched handler = new OnFetched(onFetchedHandler);
+            IntPtr pointer = Marshal.GetFunctionPointerForDelegate(handler);
+            // call objC method to pass the ptr
+            flurryRegisterOnFetchedCallback(pointer);
+            flurrySetPublisherSegmentationListener();
+        }
+
+        //Implement callback marked MonoPInvokeCallback lets objC callback using function ptr
+        [MonoPInvokeCallback(typeof(OnFetched))]
+        static void onFetchedHandler(string data) 
+        {
+            Debug.Log("OnFetched Data - " + data );
+            IDictionary<string, string> map = new Dictionary<string, string>();
+            ToDictionary(data, out map);
+            if(_flurryPublisherSegmentationListener != null){
+                _flurryPublisherSegmentationListener.OnFetched(map);
+            }
+
         }
 
         public override void Dispose() { }
@@ -493,6 +580,18 @@ namespace FlurrySDKInternal
             keys = keysBuilder.ToString();
             values = valuesBuilder.ToString();
         }
-    };
+
+        private static void ToDictionary(string rawString, out IDictionary<string, string> dictionary){
+            IDictionary<string, string> d = new Dictionary<string, string>();
+            string[] pairs = rawString.Split(';');
+            foreach (var pair in pairs){
+                string[] components = pair.Split(':');
+                string key = components[0];
+                string val = components[1];
+                d.Add(key, val);
+            }
+            dictionary = d;
+        }
+    }
 }
 #endif

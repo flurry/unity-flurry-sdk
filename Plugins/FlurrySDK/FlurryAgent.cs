@@ -84,17 +84,17 @@ namespace FlurrySDKInternal
 
         public abstract void SetVersionName(string versionName);
 
-        public abstract void SetDataSaleOptOut(bool isOptOut);
-
-        public abstract void DeleteData();
-
         public abstract void AddOrigin(string originName, string originVersion);
 
         public abstract void AddOrigin(string originName, string originVersion, IDictionary<string, string> originParameters);
 
         public abstract void AddSessionProperty(string name, string value);
 
-        public abstract void SetMessagingListener(FlurrySDK.Flurry.IFlurryMessagingListener flurryMessagingListener);
+        public abstract void SetDataSaleOptOut(bool isOptOut);
+
+        public abstract void DeleteData();
+
+        public abstract void OpenPrivacyDashboard();
 
         public abstract int GetAgentVersion();
 
@@ -114,6 +114,8 @@ namespace FlurrySDKInternal
 
         public abstract void EndTimedEvent(string eventId, IDictionary<string, string> parameters);
 
+        public abstract int LogEvent(FlurrySDK.Flurry.Event eventId, FlurrySDK.Flurry.EventParams parameters);
+
         public abstract void OnPageView();
 
         public abstract void OnError(string errorId, string message, string errorClass);
@@ -131,9 +133,15 @@ namespace FlurrySDKInternal
 
         public abstract void UpdateConversionValueWithEvent(FlurrySDK.Flurry.SKAdNetworkEvent flurryEvent);
 
-        public abstract void OpenPrivacyDashboard();
+        public abstract void SetMessagingListener(FlurrySDK.Flurry.IFlurryMessagingListener flurryMessagingListener);
+
+        public abstract IDictionary<string, string> GetPublisherSegmentation();
+
+        public abstract void FetchPublisherSegmentation();
+
+        public abstract void SetPublisherSegmentationListener(FlurrySDK.Flurry.IFlurryPublisherSegmentationListener flurryPublisherSegmentationListener);
 
         public abstract void Dispose();
 
-    };
+    }
 }

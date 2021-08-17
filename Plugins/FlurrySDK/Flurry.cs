@@ -29,7 +29,7 @@ namespace FlurrySDK
     /// Set of methods that allow developers to capture detailed, aggregate information
     /// regarding the use of their app by end users.
     /// </summary>
-    public class Flurry : IDisposable
+    public partial class Flurry : IDisposable
     {
         // init static Flurry agent object.
         private static FlurryAgent flurryAgent;
@@ -48,136 +48,6 @@ namespace FlurrySDK
 #else
             flurryAgent = null;
 #endif
-        }
-
-        // Flurry SDK constants.
-
-        /// <summary>
-        /// Constants for setting log level in analytics SDK.
-        /// </summary>
-        public enum LogLevel
-        {
-            VERBOSE = 2,
-            DEBUG   = 3,
-            INFO    = 4,
-            WARN    = 5,
-            ERROR   = 6,
-            ASSERT  = 7,
-
-            [Obsolete("please use LogLevel.VERBOSE instead of LogLevel.LogVERBOSE")]
-            LogVERBOSE = VERBOSE,
-
-            [Obsolete("please use LogLevel.DEBUG instead of LogLevel.LogDEBUG")]
-            LogDEBUG = DEBUG,
-
-            [Obsolete("please use LogLevel.INFO instead of LogLevel.LogINFO")]
-            LogINFO = INFO,
-
-            [Obsolete("please use LogLevel.WARN instead of LogLevel.LogWARN")]
-            LogWARN = WARN,
-
-            [Obsolete("please use LogLevel.ERROR instead of LogLevel.LogERROR")]
-            LogERROR = ERROR,
-
-            [Obsolete("please use LogLevel.ASSERT instead of LogLevel.LogASSERT")]
-            LogASSERT = ASSERT
-        }
-
-        /// <summary>
-        /// Constants for logging post install events using Flurry's FlurrySKAdNetwork class.
-        /// </summary>
-        public enum SKAdNetworkEvent
-        {
-            NoEvent       = 0,
-            Registration  = 1,
-            Login         = 2,
-            Subscription  = 3,
-            InAppPurchase = 4,
-        }
-
-        /// <summary>
-        /// Status for analytics event recording.
-        /// </summary>
-        public enum EventRecordStatus
-        {
-            FlurryEventFailed = 0,
-            FlurryEventRecorded,
-            FlurryEventUniqueCountExceeded,
-            FlurryEventParamsCountExceeded,
-            FlurryEventLogCountExceeded,
-            FlurryEventLoggingDelayed,
-            FlurryEventAnalyticsDisabled
-        }
-
-        /// <summary>
-        /// Constants for setting user gender in analytics SDK.
-        /// </summary>
-        public enum Gender
-        {
-            Male,
-            Female
-        }
-
-        /// <summary>
-        /// Flurry message.
-        /// </summary>
-        public class FlurryMessage
-        {
-            public string Title;
-            public string Body;
-            public string ClickAction;
-            public IDictionary<string, string> Data;
-        }
-
-        /// <summary>
-        /// If listener is set, Flurry will call this method to notify you a notification has been received.
-        /// </summary>
-        public interface IFlurryMessagingListener
-        {
-            /// <summary>
-            /// If listener is set, Flurry will call this method to notify you
-            /// a notification has been received. If you would like to handle
-            /// the notification yourself, be sure to return true to notify
-            /// Flurry you've handled it. If you return false, Flurry will continue with
-            /// default behavior, which is show the notification if app is in background,
-            /// and do nothing if app is in foreground.
-            /// </summary>
-            /// <returns><c>true</c>, if you've handled the notification. <c>false</c> if you haven't and want Flurry to handle it.</returns>
-            /// <param name="message">Message.</param>
-            bool OnNotificationReceived(FlurryMessage message);
-
-            /// <summary>
-            /// If listener is set, Flurry will call this method to notify you
-            /// a notification has been clicked. If you would like to handle
-            /// the UI navigation yourself, be sure to return true to notify
-            /// Flurry you've handled it.  If you return false, Flurry will continue with
-            /// default behavior, which is launch the app or "click_action" activity.
-            /// </summary>
-            /// <returns><c>true</c>, if you've handled the notification. <c>false</c> if you haven't and want Flurry to handle it.</returns>
-            /// <param name="message">Message.</param>
-            bool OnNotificationClicked(FlurryMessage message);
-
-            /// <summary>
-            /// If listener is set, Flurry will notify you if user has cancelled/dismissed the notification.
-            /// </summary>
-            /// <returns><c>true</c>, if you've handled the notification. <c>false</c> if you haven't and want Flurry to handle it.</returns>
-            /// <param name="message">Message.</param>
-            void OnNotificationCancelled(FlurryMessage message);
-
-            /// <summary>
-            /// If listener is set, Flurry will notify you if push notification token has been changed.
-            /// </summary>
-            /// <param name="token">Token.</param>
-            void OnTokenRefresh(string token);
-
-            /// <summary>
-            /// If listener is set, Flurry will notify you when a notification
-            /// has been received that was not sent from Flurry. Based on the various
-            /// push providers you have integrated, you may cast the Object to the appropriate type.
-            /// </summary>
-            /// <param name="nonFlurryMessage">Non flurry message.</param>
-            void OnNonFlurryNotificationReceived(IDisposable nonFlurryMessage);
-
         }
 
         /// <summary>
@@ -369,8 +239,8 @@ namespace FlurrySDK
             }
 
             /// <summary>
-            /// Exactly set, or replace if any previously exists, any state for the property.
-            /// null clears the property state.
+            /// <br>Exactly set, or replace if any previously exists, any state for the property. </br>
+            /// <br>null clears the property state. </br>
             /// </summary>
             /// <param name="propertyName">Property name.</param>
             /// <param name="propertyValue">Single property value.</param>
@@ -383,8 +253,8 @@ namespace FlurrySDK
             }
 
             /// <summary>
-            /// Exactly set, or replace if any previously exists, any state for the property.
-            /// Empty list or null clears the property state.
+            /// <br>Exactly set, or replace if any previously exists, any state for the property. </br>
+            /// <br>Empty list or null clears the property state. </br>
             /// </summary>
             /// <param name="propertyName">Property name.</param>
             /// <param name="propertyValues">List of property values.</param>
@@ -397,8 +267,8 @@ namespace FlurrySDK
             }
 
             /// <summary>
-            /// Extend any property, even no previous property.
-            /// Adding values already included in the state has no effect and does not error.
+            /// <br>Extend any property, even no previous property. </br>
+            /// <br>Adding values already included in the state has no effect and does not error. </br>
             /// </summary>
             /// <param name="propertyName">Property name.</param>
             /// <param name="propertyValue">Single property value.</param>
@@ -411,8 +281,8 @@ namespace FlurrySDK
             }
 
             /// <summary>
-            /// Extend any property, even no previous property.
-            /// Adding values already included in the state has no effect and does not error.
+            /// <br>Extend any property, even no previous property. </br>
+            /// <br>Adding values already included in the state has no effect and does not error. </br>
             /// </summary>
             /// <param name="propertyName">Property name.</param>
             /// <param name="propertyValues">List of property values.</param>
@@ -425,8 +295,8 @@ namespace FlurrySDK
             }
 
             /// <summary>
-            /// Reduce any property.
-            /// Removing values not already included in the state has no effect and does not error
+            /// <br>Reduce any property. </br>
+            /// <br>Removing values not already included in the state has no effect and does not error </br>
             /// </summary>
             /// <param name="propertyName">Property name.</param>
             /// <param name="propertyValue">Single property value.</param>
@@ -439,8 +309,8 @@ namespace FlurrySDK
             }
 
             /// <summary>
-            /// Reduce any property.
-            /// Removing values not already included in the state has no effect and does not error
+            /// <br>Reduce any property. </br>
+            /// <br>Removing values not already included in the state has no effect and does not error </br>
             /// </summary>
             /// <param name="propertyName">Property name.</param>
             /// <param name="propertyValues">List of property values.</param>
@@ -453,7 +323,7 @@ namespace FlurrySDK
             }
 
             /// <summary>
-            /// Exactly set, or replace if any previously exists, any state for the property to be empty.
+            /// <br>Exactly set, or replace if any previously exists, any state for the property to be empty. </br>
             /// </summary>
             /// <param name="propertyName">Property name.</param>
             public static void Remove(string propertyName)
@@ -465,8 +335,8 @@ namespace FlurrySDK
             }
 
             /// <summary>
-            /// Exactly set, or replace if any previously exists, any state for the property to a single true state.
-            /// Implies that value is boolean and should only be flagged and cleared.
+            /// <br>Exactly set, or replace if any previously exists, any state for the property to a single true state. </br>
+            /// <br>Implies that value is boolean and should only be flagged and cleared. </br>
             /// </summary>
             /// <param name="propertyName">Property name.</param>
             public static void Flag(string propertyName)
@@ -525,12 +395,15 @@ namespace FlurrySDK
             /// Provide a Resource logger that users can start before profiled codes start,
             /// then log event after finished. Flurry will compute the time.
             ///
-            /// e.g.
+            /// <example>e.g.
+            /// <code>
             ///   Flurry.Performance.StartResourceLogger();
             ///   {
             ///       // profiled codes ...
             ///   }
             ///   Flurry.Performance.LogResourceLogger("My ID");
+            /// </code>
+            /// </example>
             /// </summary>
             public static void StartResourceLogger()
             {
@@ -554,26 +427,78 @@ namespace FlurrySDK
         }
 
         /// <summary>
-        /// An api to send ccpa compliance data to Flurry on the user's choice to opt out or opt in to data sale to third parties. The user's preference must be used to initialize the WithDataSaleOptOut setting in the FlurrySessionBuilder in all future sessions.
+        /// Flurry message.
         /// </summary>
-        /// <param name="isOptOut">isOptOut</param>
-        public static void SetDataSaleOptOut(bool isOptOut)
+        public class FlurryMessage
         {
-            if (flurryAgent != null)
-            {
-                flurryAgent.SetDataSaleOptOut(isOptOut);
-            }
+            public string Title;
+            public string Body;
+            public string ClickAction;
+            public IDictionary<string, string> Data;
         }
-        
+
         /// <summary>
-        /// An api to allow the user to request Flurry delete their collected data from this app.
+        /// If listener is set, Flurry will call this method to notify you a notification has been received.
         /// </summary>
-        public static void DeleteData()
+        public interface IFlurryMessagingListener
         {
-            if (flurryAgent != null)
-            {
-                flurryAgent.DeleteData();
-            }
+            /// <summary>
+            /// If listener is set, Flurry will call this method to notify you
+            /// a notification has been received. If you would like to handle
+            /// the notification yourself, be sure to return true to notify
+            /// Flurry you've handled it. If you return false, Flurry will continue with
+            /// default behavior, which is show the notification if app is in background,
+            /// and do nothing if app is in foreground.
+            /// </summary>
+            /// <returns><c>true</c>, if you've handled the notification. <c>false</c> if you haven't and want Flurry to handle it.</returns>
+            /// <param name="message">Message.</param>
+            bool OnNotificationReceived(FlurryMessage message);
+
+            /// <summary>
+            /// If listener is set, Flurry will call this method to notify you
+            /// a notification has been clicked. If you would like to handle
+            /// the UI navigation yourself, be sure to return true to notify
+            /// Flurry you've handled it.  If you return false, Flurry will continue with
+            /// default behavior, which is launch the app or "click_action" activity.
+            /// </summary>
+            /// <returns><c>true</c>, if you've handled the notification. <c>false</c> if you haven't and want Flurry to handle it.</returns>
+            /// <param name="message">Message.</param>
+            bool OnNotificationClicked(FlurryMessage message);
+
+            /// <summary>
+            /// If listener is set, Flurry will notify you if user has cancelled/dismissed the notification.
+            /// </summary>
+            /// <returns><c>true</c>, if you've handled the notification. <c>false</c> if you haven't and want Flurry to handle it.</returns>
+            /// <param name="message">Message.</param>
+            void OnNotificationCancelled(FlurryMessage message);
+
+            /// <summary>
+            /// If listener is set, Flurry will notify you if push notification token has been changed.
+            /// </summary>
+            /// <param name="token">Token.</param>
+            void OnTokenRefresh(string token);
+
+            /// <summary>
+            /// If listener is set, Flurry will notify you when a notification
+            /// has been received that was not sent from Flurry. Based on the various
+            /// push providers you have integrated, you may cast the Object to the appropriate type.
+            /// </summary>
+            /// <param name="nonFlurryMessage">Non flurry message.</param>
+            void OnNonFlurryNotificationReceived(IDisposable nonFlurryMessage);
+
+        }
+
+        /// <summary>
+        /// Listener to be notified when the Publisher Segmentation data have been fetched and ready to use.
+        /// </summary>
+        public interface IFlurryPublisherSegmentationListener
+        {
+            /// <summary>
+            /// Publisher Segmentation data is fetched and ready to use.
+            /// </summary>
+            /// <param name="data">Fetched data.</param>
+            void OnFetched(IDictionary<string, string> data);
+
         }
 
         /// <summary>
@@ -690,14 +615,37 @@ namespace FlurrySDK
         }
 
         /// <summary>
-        /// Set a listener to listen notification events.
+        /// An api to send ccpa compliance data to Flurry on the user's choice to opt out or opt in to data sale to third parties. The user's preference must be used to initialize the WithDataSaleOptOut setting in the FlurrySessionBuilder in all future sessions.
         /// </summary>
-        /// <param name="flurryMessagingListener">Flurry messaging listener.</param>
-        public static void SetMessagingListener(IFlurryMessagingListener flurryMessagingListener)
+        /// <param name="isOptOut">isOptOut</param>
+        public static void SetDataSaleOptOut(bool isOptOut)
         {
             if (flurryAgent != null)
             {
-                flurryAgent.SetMessagingListener(flurryMessagingListener);
+                flurryAgent.SetDataSaleOptOut(isOptOut);
+            }
+        }
+
+        /// <summary>
+        /// An api to allow the user to request Flurry delete their collected data from this app.
+        /// </summary>
+        public static void DeleteData()
+        {
+            if (flurryAgent != null)
+            {
+                flurryAgent.DeleteData();
+            }
+        }
+
+        /// <summary>
+        /// This api opens privacy dashboard in Chrome CustomTab (if its dependency's been included in the gradle and device support it as well)
+        /// otherwise will open it in the external browser.
+        /// </summary>
+        public static void OpenPrivacyDashboard()
+        {
+            if (flurryAgent != null)
+            {
+                flurryAgent.OpenPrivacyDashboard();
             }
         }
 
@@ -834,6 +782,37 @@ namespace FlurrySDK
         }
 
         /// <summary>
+        /// Log a standard event.
+        /// </summary>
+        /// <returns>The event recording status.</returns>
+        /// <param name="eventId">Standard Event identifier.</param>
+        public static EventRecordStatus LogEvent(Event eventId)
+        {
+            if (flurryAgent != null)
+            {
+                return (EventRecordStatus)flurryAgent.LogEvent(eventId, null);
+            }
+
+            return EventRecordStatus.FlurryEventRecorded;
+        }
+
+        /// <summary>
+        /// Log a standard event with parameters.
+        /// </summary>
+        /// <returns>The event recording status.</returns>
+        /// <param name="eventId">Standard Event identifier.</param>
+        /// <param name="parameters">Standard Event parameters.</param>
+        public static EventRecordStatus LogEvent(Event eventId, EventParams parameters)
+        {
+            if (flurryAgent != null)
+            {
+                return (EventRecordStatus)flurryAgent.LogEvent(eventId, parameters);
+            }
+
+            return EventRecordStatus.FlurryEventRecorded;
+        }
+
+        /// <summary>
         /// Log a page view. Deprecated, API removed, no longer supported by Flurry.
         /// </summary>
         public static void OnPageView()
@@ -950,14 +929,50 @@ namespace FlurrySDK
         }
 
         /// <summary>
-        /// This api opens privacy dashboard in Chrome CustomTab (if its dependency's been included in the gradle and device support it as well)
-        /// otherwise will open it in the external browser.
+        /// Set a listener to listen notification events.
         /// </summary>
-        public static void OpenPrivacyDashboard()
+        /// <param name="flurryMessagingListener">Flurry messaging listener.</param>
+        public static void SetMessagingListener(IFlurryMessagingListener flurryMessagingListener)
         {
             if (flurryAgent != null)
             {
-                flurryAgent.OpenPrivacyDashboard();
+                flurryAgent.SetMessagingListener(flurryMessagingListener);
+            }
+        }
+
+        /// <summary>
+        /// Get Publisher Segmentation data without fetch; cached or newly fetched.
+        /// </summary>
+        public static IDictionary<string, string> GetPublisherSegmentation()
+        {
+            if (flurryAgent != null)
+            {
+                return flurryAgent.GetPublisherSegmentation();
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Fetch Publisher Segmentation data.
+        /// </summary>
+        public static void FetchPublisherSegmentation()
+        {
+            if (flurryAgent != null)
+            {
+                flurryAgent.FetchPublisherSegmentation();
+            }
+        }
+
+        /// <summary>
+        /// Set a listener to listen Publisher Segmentation data request.
+        /// </summary>
+        /// <param name="flurryPublisherSegmentationListener">Flurry Publisher Segmentation listener.</param>
+        public static void SetPublisherSegmentationListener(IFlurryPublisherSegmentationListener flurryPublisherSegmentationListener)
+        {
+            if (flurryAgent != null)
+            {
+                flurryAgent.SetPublisherSegmentationListener(flurryPublisherSegmentationListener);
             }
         }
 

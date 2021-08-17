@@ -3,6 +3,15 @@
 * [Flurry Android SDK Release Notes](https://developer.yahoo.com/flurry/docs/releasenotes/android/)
 * [Flurry iOS SDK Release Notes](https://developer.yahoo.com/flurry/docs/releasenotes/ios/)
 
+# v4.0.0 (2021-08-16)
+
+#### Features
+
+* Upgrade Flurry Android SDK version to 13.0.0
+* Upgrade Flurry iOS SDK version to 11.3.0
+* Support Standard Event API
+* Support Publisher Segmentation API
+
 ## v3.4.0 (2021-05-12)
 
 #### Features
