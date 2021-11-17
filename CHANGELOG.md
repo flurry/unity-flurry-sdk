@@ -3,6 +3,12 @@
 * [Flurry Android SDK Release Notes](https://developer.yahoo.com/flurry/docs/releasenotes/android/)
 * [Flurry iOS SDK Release Notes](https://developer.yahoo.com/flurry/docs/releasenotes/ios/)
 
+## v4.1.0 (2021-11-18)
+
+#### Bug Fixes
+
+* Fix Android NullReferenceException of event logging status
+
 # v4.0.0 (2021-08-16)
 
 #### Features

@@ -27,7 +27,7 @@ namespace FlurrySDKInternal
         public static NetworkReachability internetReachability = Application.internetReachability;
 
         private static readonly string ORIGIN_NAME = "unity-flurry-sdk";
-        private static readonly string ORIGIN_VERSION = "4.0.0";
+        private static readonly string ORIGIN_VERSION = "4.1.0";
 
         private static AndroidJavaClass cls_FlurryAgent = new AndroidJavaClass("com.flurry.android.FlurryAgent");
         private static AndroidJavaClass cls_FlurryAgentConstants = new AndroidJavaClass("com.flurry.android.Constants");
@@ -353,25 +353,52 @@ namespace FlurrySDKInternal
         public override int LogEvent(string eventId)
         {
             AndroidJavaObject result = cls_FlurryAgent.CallStatic<AndroidJavaObject>("logEvent", eventId);
-            return result.Call<int>("ordinal");
+            if (result != null)
+            {
+                return result.Call<int>("ordinal");
+            } else
+            {
+                return 0;
+            }
         }
 
         public override int LogEvent(string eventId, bool timed)
         {
             AndroidJavaObject result = cls_FlurryAgent.CallStatic<AndroidJavaObject>("logEvent", eventId, timed);
-            return result.Call<int>("ordinal");
+            if (result != null)
+            {
+                return result.Call<int>("ordinal");
+            }
+            else
+            {
+                return 0;
+            }
         }
 
         public override int LogEvent(string eventId, IDictionary<string, string> parameters)
         {
             AndroidJavaObject result = cls_FlurryAgent.CallStatic<AndroidJavaObject>("logEvent", eventId, ConvertToMap(parameters));
-            return result.Call<int>("ordinal");
+            if (result != null)
+            {
+                return result.Call<int>("ordinal");
+            }
+            else
+            {
+                return 0;
+            }
         }
 
         public override int LogEvent(string eventId, IDictionary<string, string> parameters, bool timed)
         {
             AndroidJavaObject result = cls_FlurryAgent.CallStatic<AndroidJavaObject>("logEvent", eventId, ConvertToMap(parameters), timed);
-            return result.Call<int>("ordinal");
+            if (result != null)
+            {
+                return result.Call<int>("ordinal");
+            }
+            else
+            {
+                return 0;
+            }
         }
 
         public override void EndTimedEvent(string eventId)
@@ -389,7 +416,13 @@ namespace FlurrySDKInternal
             AndroidJavaObject javaEventId = cls_FlurryEvent.GetStatic<AndroidJavaObject>(eventId.ToString());
             AndroidJavaObject result = cls_FlurryAgent.CallStatic<AndroidJavaObject>("logEvent",
                                                                  javaEventId, ConvertToEventParams(parameters));
-            return result.Call<int>("ordinal");
+            if (result != null)
+            {
+                return result.Call<int>("ordinal");
+            } else
+            {
+                return 0;
+            }
         }
 
         private static AndroidJavaObject ConvertToEventParams(FlurrySDK.Flurry.EventParams parameters)
@@ -444,7 +477,14 @@ namespace FlurrySDKInternal
             AndroidJavaObject result = cls_FlurryAgent.CallStatic<AndroidJavaObject>("logPayment", productName, productId,
                                                                                      quantity, price, currency, transactionId,
                                                                                      ConvertToMap(parameters));
-            return result.Call<int>("ordinal");
+            if (result != null)
+            {
+                return result.Call<int>("ordinal");
+            }
+            else
+            {
+                return 0;
+            }
         }
 
         public override void SetIAPReportingEnabled(bool enableIAP)
