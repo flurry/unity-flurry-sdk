@@ -28,8 +28,28 @@
 #import "FlurrySKAdNetwork.h"
 #endif
 
-// typedef void (*onFetchedHandler) (const char *data);
 typedef void (*OnFetched) (const char *data);
+typedef void (*OnPSFetched) (const char *data);
+
+typedef void (*OnConfigFetched)();
+typedef void (*OnConfigFetchNoChange)();
+typedef void (*OnConfigFetchFailed)();
+typedef void (*OnConfigActivated)();
+
+typedef void (*OnNotificationReceived)(const char *title, const char *body, const char *sound, const char *appData);
+typedef void (*OnNotificationClicked)(const char *title, const char *body, const char *sound, const char *appData);
+
+static OnPSFetched onPSFetchedBlock;
+
+static OnConfigFetched onConfigFetchedBlock;
+static OnConfigFetchNoChange onConfigFetchNoChangeBlock;
+static OnConfigFetchFailed onConfigFetchFailedBlock;
+static OnConfigActivated onConfigActivatedBlock;
+
+static OnNotificationReceived onNotificationReceivedBlock;
+static OnNotificationClicked onNotificationClickedBlock;
+
+// TODO: Deprecated, need to remove for next GA release
 static OnFetched onFetchedBlock;
 
 @implementation FlurryUnityPlugin
@@ -70,9 +90,9 @@ static FlurryUnityPlugin *_sharedInstance;
     NSString* originName = @"unity-flurry-sdk";
     
     #if __has_include("FlurryMessaging.h")
-    NSString* originVersion = @"4.1.0.messaging";
+    NSString* originVersion = @"4.2.0.messaging";
     #else
-    NSString* originVersion = @"4.1.0";
+    NSString* originVersion = @"4.2.0";
     #endif
     
     
@@ -88,23 +108,46 @@ static FlurryUnityPlugin *_sharedInstance;
     NSLog(@"onFetched native callback= %@", publisherData);
     if(publisherData){
         onFetchedBlock(strDup([dictionaryToNSString(publisherData) UTF8String]));
+        onPSFetchedBlock(strDup([dictionaryToNSString(publisherData) UTF8String]));
     }else{
         onFetchedBlock("");
+        onPSFetchedBlock("");
+        
+        
     }
+}
+
+- (void) fetchComplete{
+    onConfigFetchedBlock();
+}
+
+
+- (void) fetchCompleteNoChange{
+    onConfigFetchNoChangeBlock();
+}
+
+
+- (void) fetchFail{
+    onConfigFetchFailedBlock();
+}
+
+- (void) activationComplete{
+    onConfigActivatedBlock();
 }
 
 #if __has_include("FlurryMessaging.h")
 -(void) didReceiveMessage:(nonnull FlurryMessage*)message {
     NSLog(@"didReceiveMessage = %@", [message description]);
-    //App specific implementation
     
+    onNotificationReceivedBlock(strDup([message.title UTF8String]), strDup([message.body UTF8String]), strDup([message.sound UTF8String]), strDup([dictionaryToNSString(message.appData) UTF8String]));
+
 }
 
 // delegate method when a notification action is performed
 -(void) didReceiveActionWithIdentifier:(nullable NSString*)identifier message:(nonnull FlurryMessage*)message {
     NSLog(@"didReceiveAction %@ , Message = %@",identifier, [message description]);
-    //Any app specific logic goes here.
-    //Ex: Deeplink logic. See Flurry Push sample App (loading of viewControllers (nibs or storboards))
+    
+    onNotificationClickedBlock(strDup([message.title UTF8String]), strDup([message.body UTF8String]), strDup([message.sound UTF8String]), strDup([dictionaryToNSString(message.appData) UTF8String]));
     
 }
 #endif
@@ -387,6 +430,14 @@ extern "C" {
         NSString *userIdStr = strToNSStr(userId);
         [Flurry setUserID:userIdStr];
     }
+
+    const void flurrySetSessionContinueSeconds(long seconds){
+        [Flurry setSessionContinueSeconds: seconds];
+    }
+
+    const void flurrySetIncludeBackgroundSessionsInMetrics(bool includeBackgroundSessionsInMetrics) {
+        [Flurry setCountBackgroundSessions:includeBackgroundSessionsInMetrics];
+    }
     
     const void flurrySetAge(const int age) {
         [Flurry setAge:age];
@@ -427,7 +478,8 @@ extern "C" {
     }
     
     const void flurrySetVersionName(const char* versionName) {
-        NSLog(@"SetVersionName is removed from the Flurry SDK. Use WithAppVersion in the session builder instead.");
+        NSString *versionNameStr = strToNSStr(versionName);
+        [Flurry setAppVersion:versionNameStr];
     }
     
     const void flurryAddSessionProperty(const char* name, const char* value) {
@@ -482,6 +534,23 @@ extern "C" {
         NSString *crashBreadcrumbStr = strToNSStr(crashBreadcrumb);
         
         [Flurry leaveBreadcrumb:crashBreadcrumbStr];
+    }
+
+    const void flurryLogPayment(const char* productName, const char* productId, const int quantity, const double price, const char* currency, const char* transactionId, const char* keys, const char* values) {
+        NSString *productNameStr = strToNSStr(productName);
+        NSString *productIdStr = strToNSStr(productId);
+        NSString *currencyStr = strToNSStr(currency);
+        NSString *transactionIdStr = strToNSStr(transactionId);
+
+        [Flurry logPaymentTransactionWithTransactionId:transactionIdStr
+                productId:productIdStr
+                quantity:quantity
+                price:price
+                currency:currencyStr
+                productName:productNameStr
+                transactionState:FlurryPaymentTransactionStatePurchasing
+                userDefinedParams:keyValueToDict(keys,values)
+                statusCallback:nil];
     }
     
     const void flurrySetIAPReportingEnabled(bool enableIAP){
@@ -552,11 +621,66 @@ extern "C" {
         return strDup([dictionaryToNSString(data) UTF8String]);
     }
     
+    const void flurryRegisterOnPSFetchedCallback(OnPSFetched handler){
+        onPSFetchedBlock = handler;
+    }
     
-    void flurryRegisterOnFetchedCallback(OnFetched handler)
+    // TODO: Deprecated, and need to remove for next GA release
+    const void flurryRegisterOnFetchedCallback(OnFetched handler)
     {
         onFetchedBlock = handler;
     }
+    
+    const void flurrySetConfigListener(){
+#if __has_include("FConfig.h")
+        FlurryUnityPlugin* sharedInstance = [FlurryUnityPlugin shared];
+        [[FConfig sharedInstance] registerObserver:sharedInstance withExecutionQueue:dispatch_get_main_queue()];
+#endif
+    }
+    
+    const void flurryRegisterConfigCallback(OnConfigFetched handler1, OnConfigFetchNoChange handler2, OnConfigFetchFailed handler3, OnConfigActivated handler4){
+        
+#if __has_include("FConfig.h")
+        onConfigFetchedBlock = handler1;
+        onConfigFetchNoChangeBlock = handler2;
+        onConfigFetchFailedBlock = handler3;
+        onConfigActivatedBlock = handler4;
+#endif
+
+    }
+    
+    const void flurryConfigFetch(){
+#if __has_include("FConfig.h")
+        [[FConfig sharedInstance] fetch];
+#endif
+    }
+    
+    const void flurryConfigActivate(){
+#if __has_include("FConfig.h")
+        [[FConfig sharedInstance] activateConfig];
+#endif
+    }
+    
+    const char* flurryConfigGetString(const char* key, const char* defaultValue){
+        NSString *str = nil;
+#if __has_include("FConfig.h")
+         str = [[FConfig sharedInstance] getStringForKey: strToNSStr(key)
+                                             withDefault: strToNSStr(defaultValue)];
+#endif
+        return strDup([str UTF8String]);
+        
+    }
+    
+    const void flurryRegisterMessagingCallback(OnNotificationReceived handler1, OnNotificationClicked handler2){
+#if __has_include("FlurryMessaging.h")
+        onNotificationReceivedBlock = handler1;
+        onNotificationClickedBlock = handler2;
+#endif
+        
+    }
+    
 }
 
 @end
+
+

@@ -3,6 +3,17 @@
 * [Flurry Android SDK Release Notes](https://developer.yahoo.com/flurry/docs/releasenotes/android/)
 * [Flurry iOS SDK Release Notes](https://developer.yahoo.com/flurry/docs/releasenotes/ios/)
 
+## v4.2.0 (2021-12-08)
+
+#### Features
+
+* Upgrade Flurry Android SDK version to 13.1.0
+* Upgrade Flurry iOS SDK version to 11.4.0
+* Support Agent setters API
+* Support Flurry Config for remote configuration
+* Improve Messaging, Config, and Publisher Segmentation listener schemes
+* Improve examples in README
+
 ## v4.1.0 (2021-11-18)
 
 #### Bug Fixes

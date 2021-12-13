@@ -27,7 +27,7 @@ namespace FlurrySDKInternal
         public static NetworkReachability internetReachability = Application.internetReachability;
 
         private static readonly string ORIGIN_NAME = "unity-flurry-sdk";
-        private static readonly string ORIGIN_VERSION = "4.1.0";
+        private static readonly string ORIGIN_VERSION = "4.2.0";
 
         private static AndroidJavaClass cls_FlurryAgent = new AndroidJavaClass("com.flurry.android.FlurryAgent");
         private static AndroidJavaClass cls_FlurryAgentConstants = new AndroidJavaClass("com.flurry.android.Constants");
@@ -56,14 +56,14 @@ namespace FlurrySDKInternal
                 Debug.Log("iOS only. For Android, please also call Flurry.setVersionName().");
             }
 
-            public override void WithCrashReporting(bool crashReporting)
-            {
-                obj_FlurryAgentBuilder.Call<AndroidJavaObject>("withCaptureUncaughtExceptions", crashReporting);
-            }
-
             public override void WithContinueSessionMillis(long sessionMillis)
             {
                 obj_FlurryAgentBuilder.Call<AndroidJavaObject>("withContinueSessionMillis", sessionMillis);
+            }
+
+            public override void WithCrashReporting(bool crashReporting)
+            {
+                obj_FlurryAgentBuilder.Call<AndroidJavaObject>("withCaptureUncaughtExceptions", crashReporting);
             }
 
             public override void WithIncludeBackgroundSessionsInMetrics(bool includeBackgroundSessionsInMetrics)
@@ -94,6 +94,11 @@ namespace FlurrySDKInternal
             public override void WithPerformanceMetrics(int performanceMetrics)
             {
                 obj_FlurryAgentBuilder.Call<AndroidJavaObject>("withPerformanceMetrics", performanceMetrics);
+            }
+
+            public override void WithSslPinningEnabled(bool sslPinningEnabled)
+            {
+                obj_FlurryAgentBuilder.Call<AndroidJavaObject>("withSslPinningEnabled", sslPinningEnabled);
             }
         }
 
@@ -166,14 +171,90 @@ namespace FlurrySDKInternal
             }
         }
 
+        public class AgentConfigAndroid : AgentConfig
+        {
+            private static AndroidJavaClass cls_FlurryConfig = new AndroidJavaClass("com.flurry.android.FlurryConfig");
+            private static AndroidJavaObject obj_FlurryConfig;
+
+            private static AndroidJavaObject getInstance()
+            {
+                if (obj_FlurryConfig == null)
+                {
+                    obj_FlurryConfig = cls_FlurryConfig.CallStatic<AndroidJavaObject>("getInstance");
+                }
+
+                return obj_FlurryConfig;
+            }
+
+            public override void Fetch()
+            {
+                getInstance().Call("fetchConfig");
+            }
+
+            public override void Activate()
+            {
+                getInstance().Call<bool>("activateConfig");
+            }
+
+            public override void SetListener(FlurrySDK.Flurry.IConfigListener configListener)
+            {
+                if (configListener != null)
+                {
+                    getInstance().Call("registerListener", new ConfigCallback(configListener));
+                }
+            }
+
+            public override string GetString(string key, string defaultValue)
+            {
+                return getInstance().Call<string>("getString", key, defaultValue);
+            }
+
+        }
+
+        class ConfigCallback : AndroidJavaProxy
+        {
+            private readonly FlurrySDK.Flurry.IConfigListener configListener;
+
+            public ConfigCallback(FlurrySDK.Flurry.IConfigListener configListener)
+                : base("com.flurry.android.FlurryConfigListener")
+            {
+                this.configListener = configListener;
+            }
+
+#pragma warning disable IDE1006 // Naming Styles
+
+            void onFetchSuccess()
+            {
+                configListener.OnFetchSuccess();
+            }
+
+            void onFetchNoChange()
+            {
+                configListener.OnFetchNoChange();
+            }
+
+            void onFetchError(bool isRetrying)
+            {
+                configListener.OnFetchError(isRetrying);
+            }
+
+            void onActivateComplete(bool isCache)
+            {
+                configListener.OnActivateComplete(isCache);
+            }
+
+#pragma warning restore IDE1006 // Naming Styles
+
+        }
+
         class MessagingCallback : AndroidJavaProxy
         {
-            private readonly FlurrySDK.Flurry.IFlurryMessagingListener messagingListener;
+            private readonly FlurrySDK.Flurry.IMessagingListener messagingListener;
 
-            public MessagingCallback(FlurrySDK.Flurry.IFlurryMessagingListener flurryMessagingListener)
+            public MessagingCallback(FlurrySDK.Flurry.IMessagingListener messagingListener)
                 : base("com.flurry.android.marketing.messaging.FlurryMessagingListener")
             {
-                messagingListener = flurryMessagingListener;
+                this.messagingListener = messagingListener;
             }
 
 #pragma warning disable IDE1006 // Naming Styles
@@ -219,14 +300,40 @@ namespace FlurrySDKInternal
 
         }
 
+        public class AgentPublisherSegmentationAndroid : AgentPublisherSegmentation
+        {
+            private static AndroidJavaClass cls_FlurryPublisherSegmentation = new AndroidJavaClass("com.flurry.android.FlurryPublisherSegmentation");
+
+            public override void Fetch()
+            {
+                cls_FlurryPublisherSegmentation.CallStatic("fetch");
+            }
+
+            public override void SetListener(FlurrySDK.Flurry.IPublisherSegmentationListener publisherSegmentationListener)
+            {
+                if (publisherSegmentationListener != null)
+                {
+                    cls_FlurryPublisherSegmentation.CallStatic("registerFetchListener", new PublisherSegmentationCallback(publisherSegmentationListener));
+                }
+            }
+
+            public override IDictionary<string, string> GetData()
+            {
+                AndroidJavaObject data = cls_FlurryPublisherSegmentation.CallStatic<AndroidJavaObject>("getPublisherData");
+
+                return ConvertToDictionary<string, string>(data);
+            }
+
+        }
+
         class PublisherSegmentationCallback : AndroidJavaProxy
         {
-            private readonly FlurrySDK.Flurry.IFlurryPublisherSegmentationListener publisherSegmentationListener;
+            private readonly FlurrySDK.Flurry.IPublisherSegmentationListener publisherSegmentationListener;
 
-            public PublisherSegmentationCallback(FlurrySDK.Flurry.IFlurryPublisherSegmentationListener flurryMessagingListener)
+            public PublisherSegmentationCallback(FlurrySDK.Flurry.IPublisherSegmentationListener publisherSegmentationListener)
                 : base("com.flurry.android.FlurryPublisherSegmentation$FetchListener")
             {
-                publisherSegmentationListener = flurryMessagingListener;
+                this.publisherSegmentationListener = publisherSegmentationListener;
             }
 
 #pragma warning disable IDE1006 // Naming Styles
@@ -238,6 +345,36 @@ namespace FlurrySDKInternal
 
 #pragma warning restore IDE1006 // Naming Styles
 
+        }
+
+        public override void SetContinueSessionMillis(long sessionMillis)
+        {
+            cls_FlurryAgent.CallStatic("setContinueSessionMillis", sessionMillis);
+        }
+
+        public override void SetCrashReporting(bool crashReporting)
+        {
+            cls_FlurryAgent.CallStatic("setCaptureUncaughtExceptions", crashReporting);
+        }
+
+        public override void SetIncludeBackgroundSessionsInMetrics(bool includeBackgroundSessionsInMetrics)
+        {
+            cls_FlurryAgent.CallStatic("setIncludeBackgroundSessionsInMetrics", includeBackgroundSessionsInMetrics);
+        }
+
+        public override void SetLogEnabled(bool enableLog)
+        {
+            cls_FlurryAgent.CallStatic("setLogEnabled", enableLog);
+        }
+
+        public override void SetLogLevel(FlurrySDK.Flurry.LogLevel logLevel)
+        {
+            cls_FlurryAgent.CallStatic("setLogLevel", (int)logLevel);
+        }
+
+        public override void SetSslPinningEnabled(bool sslPinningEnabled)
+        {
+            cls_FlurryAgent.CallStatic("setSslPinningEnabled", sslPinningEnabled);
         }
 
         public override void SetAge(int age)
@@ -502,16 +639,16 @@ namespace FlurrySDKInternal
            Debug.Log("UpdateConversionValueWithEvent is for iOS only.");
         }
 
-        public override void SetMessagingListener(FlurrySDK.Flurry.IFlurryMessagingListener flurryMessagingListener)
+        public override void SetMessagingListener(FlurrySDK.Flurry.IMessagingListener messagingListener)
         {
             Debug.Log("To enable Flurry Messaging for Android, please remember to update your AndroidManifest.xml to setup the Messaging.");
 
-            if (flurryMessagingListener != null)
+            if (messagingListener != null)
             {
                 try
                 {
                     AndroidJavaClass cls_FlurryApplication = new AndroidJavaClass("com.flurry.android.FlurryUnityApplication");
-                    cls_FlurryApplication.CallStatic("withFlurryMessagingListener", new MessagingCallback(flurryMessagingListener));
+                    cls_FlurryApplication.CallStatic("withFlurryMessagingListener", new MessagingCallback(messagingListener));
                 }
                 catch (AndroidJavaException)
                 {
@@ -520,6 +657,7 @@ namespace FlurrySDKInternal
             }
         }
 
+        [Obsolete("please use PublisherSegmentation.GetData() instead of GetPublisherSegmentation()")]
         public override IDictionary<string, string> GetPublisherSegmentation()
         {
             AndroidJavaClass cls_FlurryPublisherSegmentation = new AndroidJavaClass("com.flurry.android.FlurryPublisherSegmentation");
@@ -528,18 +666,20 @@ namespace FlurrySDKInternal
             return ConvertToDictionary<string, string>(data);
         }
 
+        [Obsolete("please use PublisherSegmentation.Fetch() instead of FetchPublisherSegmentation()")]
         public override void FetchPublisherSegmentation()
         {
             AndroidJavaClass cls_FlurryPublisherSegmentation = new AndroidJavaClass("com.flurry.android.FlurryPublisherSegmentation");
             cls_FlurryPublisherSegmentation.CallStatic("fetch");
         }
 
-        public override void SetPublisherSegmentationListener(FlurrySDK.Flurry.IFlurryPublisherSegmentationListener flurryPublisherSegmentationListener)
+        [Obsolete("please use PublisherSegmentation.RegisterListener() instead of SetPublisherSegmentationListener()")]
+        public override void SetPublisherSegmentationListener(FlurrySDK.Flurry.IFlurryPublisherSegmentationListener publisherSegmentationListener)
         {
-            if (flurryPublisherSegmentationListener != null)
+            if (publisherSegmentationListener != null)
             {
                 AndroidJavaClass cls_FlurryPublisherSegmentation = new AndroidJavaClass("com.flurry.android.FlurryPublisherSegmentation");
-                cls_FlurryPublisherSegmentation.CallStatic("registerFetchListener", new PublisherSegmentationCallback(flurryPublisherSegmentationListener));
+                cls_FlurryPublisherSegmentation.CallStatic("registerFetchListener", new PublisherSegmentationCallback(publisherSegmentationListener));
             }
         }
 

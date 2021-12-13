@@ -2,7 +2,7 @@
 
 A Unity plugin for Flurry SDK
 
-**Flurry Push** for messaging is now supported by our plugin!
+**Flurry Push** for messaging and **Flurry Config** for remote configuration are supported by our plugin!
 
 ## Table of contents
 
@@ -16,7 +16,7 @@ A Unity plugin for Flurry SDK
 
 ## Installation
 
-1. Download the Flurry Unity package from [flurry-sdk-4.1.0.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-4.1.0.unitypackage), or [flurry-sdk-4.1.0-push.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-4.1.0-push.unitypackage) if you want to use Flurry Push.
+1. Download the Flurry Unity package from [flurry-sdk-4.2.0.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-4.2.0.unitypackage), or [flurry-sdk-4.2.0-push.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-4.2.0-push.unitypackage) if you want to use Flurry Push.
    - If you are using Apple Xcode < 12, please use releases [flurry-sdk-3.3.0.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-3.3.0.unitypackage), or [flurry-sdk-3.3.0-push.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-3.3.0-push.unitypackage).
 2. Open your project in Unity Editor, choose menu **Assets** > **Import Package** > **Custom Package…** to bring up the File chooser, and select the package downloaded.
 3. Add Flurry code
@@ -29,7 +29,7 @@ A Unity plugin for Flurry SDK
 
 **Note**: `FlurryUnityApplication.java` is now bundled in the `aar` format. Please manually remove `FlurryUnityApplication.java` imported by the previous release from the `Assets/Plugins/Android` folder.
 
-- To improve analytics identities, please see [Manual Flurry Android SDK Integration](https://developer.yahoo.com/flurry/docs/integrateflurry/android-manual/) for adding Google Play Services library in your app by including `play-services-base` and `play-services-ads` libraries.
+- To improve analytics identities, please see [Manual Flurry Android SDK Integration](https://developer.yahoo.com/flurry/docs/integrateflurry/android-manual/) for adding Google Play Services library in your app by including `play-services-ads-identifier` libraries.
 - **Flurry Push**</br>
   In order to use [Flurry Push](https://developer.yahoo.com/flurry/docs/push/) for [Android](https://developer.yahoo.com/flurry/docs/push/integration/android/), please follow the additional steps below:
   1. Follow [Set up a Firebase Cloud Messaging client app with Unity](https://firebase.google.com/docs/cloud-messaging/unity/client). Complete to the 5th step for importing Firebase SDK. There should be a file `google-services.json` in your project's `Android` folder now. You do not need to provide any setup codes here.
@@ -65,122 +65,179 @@ There are some minor differences between the Android and iOS plugin:
 
 ## Example
 
-```c
-using System.Collections.Generic;
-using UnityEngine;
+- `Example.cs`
 
-using FlurrySDK;
+   ```c
+   using System.Collections.Generic;
+   using UnityEngine;
+   
+   using FlurrySDK;
+   
+   public class FlurryStart : MonoBehaviour
+   {
+   
+   #if UNITY_ANDROID
+       private readonly string FLURRY_API_KEY = FLURRY_ANDROID_API_KEY;
+   #elif UNITY_IPHONE
+       private readonly string FLURRY_API_KEY = FLURRY_IOS_API_KEY;
+   #else
+       private readonly string FLURRY_API_KEY = null;
+   #endif
+   
+       void Start()
+       {
+           // Note: When enabling Messaging, Flurry Android should be initialized by using AndroidManifest.xml.
+           // Initialize Flurry once.
+           new Flurry.Builder()
+                     .WithCrashReporting(true)
+                     .WithLogEnabled(true)
+                     .WithLogLevel(Flurry.LogLevel.DEBUG)
+                     .WithMessaging(true)
+                     .Build(FLURRY_API_KEY);
+   
+           // Example to get Flurry versions.
+           Debug.Log("AgentVersion: " + Flurry.GetAgentVersion());
+           Debug.Log("ReleaseVersion: " + Flurry.GetReleaseVersion());
+   
+           // Set Flurry preferences.
+           Flurry.SetLogEnabled(true);
+           Flurry.SetLogLevel(Flurry.LogLevel.VERBOSE);
+    
+           // Set user preferences.
+           Flurry.SetAge(36);
+           Flurry.SetGender(Flurry.Gender.Female);
+           Flurry.SetReportLocation(true);
+     
+           // Set user properties.
+           Flurry.UserProperties.Set(Flurry.UserProperties.PROPERTY_REGISTERED_USER, "True");
+   
+           // Log Flurry events.
+           Flurry.EventRecordStatus status = Flurry.LogEvent("Unity Event");
+           Debug.Log("Log Unity Event status: " + status);
+   
+           // Log Flurry timed events with parameters.
+           IDictionary<string, string> parameters = new Dictionary<string, string>();
+           parameters.Add("Author", "Flurry");
+           parameters.Add("Status", "Registered");
+           status = Flurry.LogEvent("Unity Event Params Timed", parameters, true);
+           Debug.Log("Log Unity Event with parameters timed status: " + status);
+           ...
+           Flurry.EndTimedEvent("Unity Event Params Timed");
+           
+           // Log Flurry standard events.
+           status = Flurry.LogEvent(Flurry.Event.APP_ACTIVATED);
+           Debug.Log("Log Unity Standard Event status: " + status);
+   
+           Flurry.EventParams stdParams = new Flurry.EventParams()
+               .PutDouble (Flurry.EventParam.TOTAL_AMOUNT, 34.99)
+               .PutBoolean(Flurry.EventParam.SUCCESS, true)
+               .PutString (Flurry.EventParam.ITEM_NAME, "book 1")
+               .PutString ("note", "This is an awesome book to purchase !!!");
+           status = Flurry.LogEvent(Flurry.Event.PURCHASED, stdParams);
+           Debug.Log("Log Unity Standard Event with parameters status: " + status);
+       }
+   }
+   ```
 
-public class FlurryStart : MonoBehaviour
-{
+- `Config.cs`
 
-#if UNITY_ANDROID
-    private readonly string FLURRY_API_KEY = FLURRY_ANDROID_API_KEY;
-#elif UNITY_IPHONE
-    private readonly string FLURRY_API_KEY = FLURRY_IOS_API_KEY;
-#else
-    private readonly string FLURRY_API_KEY = null;
-#endif
+   ```c
+   // Register Config listener
+   Flurry.Config.RegisterListener(new MyConfigListener());
+   Flurry.Config.Fetch();
+           
+   public class MyConfigListener : Flurry.IConfigListener
+   {
+       public void OnFetchSuccess()
+       {
+           Debug.Log("Config Fetch Completed with state: Success");
+           Flurry.Config.Activate();
+       }
+   
+       public void OnFetchNoChange()
+       {
+           Debug.Log("Config Fetch Completed with state: No Change");
+           complete();
+       }
+   
+       public void OnFetchError(bool isRetrying)
+       {
+           Debug.Log("Config Fetch Completed with state: Fail - " + (isRetrying ? "Retrying" : "End"));
+           complete();
+       }
+   
+       public void OnActivateComplete(bool isCache)
+       {
+           Debug.Log("Config Fetch Completed with state: Activate Completed - " + (isCache ? "Cached" : "New"));
+           complete();
+       }
+   
+       private void complete()
+       {
+           string welcome_message =  Flurry.Config.GetString("welcome_message", "Welcome!");
+           Debug.Log("Get Config Welcome message: " + welcome_message);
+       }
+   }
+   ```
 
-    void Start()
-    {
-        // Note: When enabling Messaging, Flurry Android should be initialized by using AndroidManifest.xml.
-        // Initialize Flurry once.
-        new Flurry.Builder()
-                  .WithCrashReporting(true)
-                  .WithLogEnabled(true)
-                  .WithLogLevel(Flurry.LogLevel.VERBOSE)
-                  .WithMessaging(true)
-                  .Build(FLURRY_API_KEY);
+- `Messaging.cs`
 
-        // Example to get Flurry versions and publisher segmentation.
-        Debug.Log("AgentVersion: " + Flurry.GetAgentVersion());
-        Debug.Log("ReleaseVersion: " + Flurry.GetReleaseVersion());
-        Flurry.SetPublisherSegmentationListener(new MyPublisherSegmentationListener());
-        Flurry.FetchPublisherSegmentation();
+   ```c
+   // Set Messaging listener
+   Flurry.SetMessagingListener(new MyMessagingListener());
+   
+   public class MyMessagingListener : Flurry.IMessagingListener
+   {
+       // If you would like to handle the notification yourself, return true to notify Flurry
+       // you've handled it, and Flurry will not show the notification.
+       public bool OnNotificationReceived(Flurry.FlurryMessage message)
+       {
+           Debug.Log("Flurry Messaging Notification Received: " + message.Title);
+           return false;
+       }
+   
+       // If you would like to handle the notification yourself, return true to notify Flurry
+       // you've handled it, and Flurry will not launch the app or "click_action" activity.
+       public bool OnNotificationClicked(Flurry.FlurryMessage message)
+       {
+           Debug.Log("Flurry Messaging Notification Clicked: " + message.Title);
+           return false;
+       }
+   
+       public void OnNotificationCancelled(Flurry.FlurryMessage message)
+       {
+           Debug.Log("Flurry Messaging Notification Cancelled: " + message.Title);
+       }
+   
+       public void OnTokenRefresh(string token)
+       {
+           Debug.Log("Flurry Messaging Token Refresh: " + token);
+       }
+   
+       public void OnNonFlurryNotificationReceived(IDisposable nonFlurryMessage)
+       {
+           Debug.Log("Flurry Messaging Non-Flurry Notification.");
+       }
+   }
+   ```
 
-        // Set user preferences.
-        Flurry.SetAge(36);
-        Flurry.SetGender(Flurry.Gender.Female);
-        Flurry.SetReportLocation(true);
-  
-        // Set user properties.
-        Flurry.UserProperties.Set(Flurry.UserProperties.PROPERTY_REGISTERED_USER, "True");
+- `Publisher.cs`
 
-        // Set Messaging listener
-        Flurry.SetMessagingListener(new MyMessagingListener());
+   ```c
+   // Register Publisher Segmentation listener
+   Flurry.PublisherSegmentation.RegisterListener(new MyPublisherSegmentationListener());
+   Flurry.PublisherSegmentation.Fetch();
 
-        // Log Flurry events.
-        Flurry.EventRecordStatus status = Flurry.LogEvent("Unity Event");
-        Debug.Log("Log Unity Event status: " + status);
-
-        // Log Flurry timed events with parameters.
-        IDictionary<string, string> parameters = new Dictionary<string, string>();
-        parameters.Add("Author", "Flurry");
-        parameters.Add("Status", "Registered");
-        status = Flurry.LogEvent("Unity Event Params Timed", parameters, true);
-        Debug.Log("Log Unity Event with parameters timed status: " + status);
-        ...
-        Flurry.EndTimedEvent("Unity Event Params Timed");
-        
-        // Log Flurry standard events.
-        status = Flurry.LogEvent(Flurry.Event.APP_ACTIVATED);
-        Debug.Log("Log Unity Standard Event status: " + status);
-
-        Flurry.EventParams stdParams = new Flurry.EventParams()
-            .PutDouble (Flurry.EventParam.TOTAL_AMOUNT, 34.99)
-            .PutBoolean(Flurry.EventParam.SUCCESS, true)
-            .PutString (Flurry.EventParam.ITEM_NAME, "book 1")
-            .PutString ("note", "This is an awesome book to purchase !!!");
-        status = Flurry.LogEvent(Flurry.Event.PURCHASED, stdParams);
-        Debug.Log("Log Unity Standard Event with parameters status: " + status);
-    }
-
-    public class MyPublisherSegmentationListener : Flurry.IFlurryPublisherSegmentationListener
-    {
-        public void OnFetched(IDictionary<string, string> data)
-        {
-            string segments;
-            data.TryGetValue("segments", out segments);
-            Debug.Log("Flurry Publisher Segmentation Fetched: " + segments);
-        }
-    }
-
-    public class MyMessagingListener : Flurry.IFlurryMessagingListener
-    {
-        // If you would like to handle the notification yourself, return true to notify Flurry
-        // you've handled it, and Flurry will not show the notification.
-        public bool OnNotificationReceived(Flurry.FlurryMessage message)
-        {
-            Debug.Log("Flurry Messaging Notification Received: " + message.Title);
-            return false;
-        }
-
-        // If you would like to handle the notification yourself, return true to notify Flurry
-        // you've handled it, and Flurry will not launch the app or "click_action" activity.
-        public bool OnNotificationClicked(Flurry.FlurryMessage message)
-        {
-            Debug.Log("Flurry Messaging Notification Clicked: " + message.Title);
-            return false;
-        }
-
-        public void OnNotificationCancelled(Flurry.FlurryMessage message)
-        {
-            Debug.Log("Flurry Messaging Notification Cancelled: " + message.Title);
-        }
-
-        public void OnTokenRefresh(string token)
-        {
-            Debug.Log("Flurry Messaging Token Refresh: " + token);
-        }
-
-        public void OnNonFlurryNotificationReceived(IDisposable nonFlurryMessage)
-        {
-            Debug.Log("Flurry Messaging Non-Flurry Notification.");
-        }
-    }
-}
-```
+   public class MyPublisherSegmentationListener : Flurry.IPublisherSegmentationListener
+   {
+       public void OnFetched(IDictionary<string, string> data)
+       {
+           string segments;
+           data.TryGetValue("segments", out segments);
+           Debug.Log("Flurry Publisher Segmentation Fetched: " + segments);
+       }
+   }
+   ```
 
 ## API Reference
 
@@ -190,16 +247,29 @@ See [Android](http://flurry.github.io/flurry-android-sdk/)-[(FlurryAgent)](http:
 - **Methods in Flurry.Builder to initialize Flurry Agent**
 
   ```c
-  void Build(string apiKey);
   Builder WithAppVersion(string appVersion); // iOS only. For Android, please use Flurry.setVersionName() instead.
-  Builder WithCrashReporting(bool crashReporting);
   Builder WithContinueSessionMillis(long sessionMillis);
+  Builder WithCrashReporting(bool crashReporting);
+  Builder WithDataSaleOptOut(bool isOptOut);
   Builder WithIncludeBackgroundSessionsInMetrics(bool includeBackgroundSessionsInMetrics);
   Builder WithLogEnabled(bool enableLog);
   Builder WithLogLevel(Flurry.LogLevel logLevel); // LogLevel = { VERBOSE, DEBUG, INFO, WARN, ERROR, ASSERT }
-  Builder WithPerformanceMetrics(Flurry.Performance performanceMetrics); // Performance = { NONE, COLD_START, SCREEN_TIME, ALL }
   Builder WithMessaging(bool enableMessaging);
-  Builder WithDataSaleOptOut(bool isOptOut);
+  Builder WithPerformanceMetrics(Flurry.Performance performanceMetrics); // Performance = { NONE, COLD_START, SCREEN_TIME, ALL }
+  Builder WithSslPinningEnabled(bool sslPinningEnabled); // Android only
+
+  void Build(string apiKey);
+  ```
+
+- **Methods to set Flurry preferences**
+
+  ```javascript
+  void SetContinueSessionMillis(long sessionMillis);
+  void SetCrashReporting(bool crashReporting);
+  void SetIncludeBackgroundSessionsInMetrics(bool includeBackgroundSessionsInMetrics);
+  void SetLogEnabled(bool enableLog);
+  void SetLogLevel(Flurry.LogLevel logLevel); // LogLevel = { VERBOSE, DEBUG, INFO, WARN, ERROR, ASSERT }
+  void SetSslPinningEnabled(bool sslPinningEnabled); // Android only
   ```
 
 - **Methods to set user preferences**
@@ -228,6 +298,8 @@ See [Android](http://flurry.github.io/flurry-android-sdk/)-[(FlurryAgent)](http:
 - **Methods in Flurry.UserProperties to set user properties**
 
   ```c
+  // Standard User Properties: Flurry.UserProperties = {
+  //     PROPERTY_CURRENCY_PREFERENCE, PROPERTY_PURCHASER, PROPERTY_REGISTERED_USER, PROPERTY_SUBSCRIBER }
   void Set(string propertyName, string propertyValue);
   void Set(string propertyName, List<string> propertyValues);
   void Add(string propertyName, string propertyValue);
@@ -238,29 +310,30 @@ See [Android](http://flurry.github.io/flurry-android-sdk/)-[(FlurryAgent)](http:
   void Flag(string propertyName);
   ```
 
-- **Methods to get Flurry versions and publisher segmentation**
+- **Methods to get Flurry versions**
 
   ```c
   int GetAgentVersion();
   string GetReleaseVersion();
-  string GetSessionId();
-  
-  IDictionary<string, string> GetPublisherSegmentation();
-  void FetchPublisherSegmentation();
-  void SetPublisherSegmentationListener(IFlurryPublisherSegmentationListener flurryPublisherSegmentationListener);
-
-  interface IFlurryPublisherSegmentationListener
-  {
-      void OnFetched(IDictionary<string, string> data);
-  }
+  string GetSessionId();  
   ```
 
 - **Methods to log Flurry events**
 
   ```c
+  enum EventRecordStatus {
+      FlurryEventFailed,
+      FlurryEventRecorded,
+      FlurryEventUniqueCountExceeded,
+      FlurryEventParamsCountExceeded,
+      FlurryEventLogCountExceeded,
+      FlurryEventLoggingDelayed,
+      FlurryEventAnalyticsDisabled
+  }
+
   EventRecordStatus LogEvent(string eventId);
-  EventRecordStatus LogEvent(string eventId, bool timed);
   EventRecordStatus LogEvent(string eventId, IDictionary<string, string> parameters);
+  EventRecordStatus LogEvent(string eventId, bool timed);
   EventRecordStatus LogEvent(string eventId, IDictionary<string, string> parameters, bool timed);
 
   void EndTimedEvent(string eventId);
@@ -314,20 +387,38 @@ See [Android](http://flurry.github.io/flurry-android-sdk/)-[(FlurryAgent)](http:
   void UpdateConversionValueWithEvent(Flurry.SKAdNetworkEvent flurryEvent); // SKAdNetworkEvent = { NoEvent, Registration, Login, Subscription, InAppPurchase }
   ```
 
-- **Methods for Flurry Performance Metrics**
+- **Methods in Flurry.Performance for Flurry Performance Metrics**
 
   ```c
-  void Flurry.Performance.StartResourceLogger();
-  void Flurry.Performance.LogResourceLogger(string id);
-  void Flurry.Performance.ReportFullyDrawn();
+  void StartResourceLogger();
+  void LogResourceLogger(string id);
+  void ReportFullyDrawn();
+  ```
+
+- **Methods in Flurry.Config for Flurry Config**
+
+  ```c
+  void Fetch();
+  void Activate();
+  void RegisterListener  (IConfigListener configListener);
+  void UnregisterListener(IConfigListener configListener);
+  string GetString(string key, string defaultValue);
+
+  interface IConfigListener
+  {
+      void OnFetchSuccess();
+      void OnFetchNoChange();
+      void OnFetchError(bool isRetrying);
+      void OnActivateComplete(bool isCache);
+  }
   ```
 
 - **Methods for Messaging (Flurry Push)**
 
   ```c
-  void SetMessagingListener(IFlurryMessagingListener flurryMessagingListener);
+  void SetMessagingListener(IMessagingListener messagingListener);
 
-  interface IFlurryMessagingListener
+  interface IMessagingListener
   {
       bool OnNotificationReceived(FlurryMessage message);
       bool OnNotificationClicked(FlurryMessage message);
@@ -342,6 +433,20 @@ See [Android](http://flurry.github.io/flurry-android-sdk/)-[(FlurryAgent)](http:
       string Body;
       string ClickAction;
       IDictionary<string, string> Data;
+  }
+  ```
+
+- **Methods in Flurry.PublisherSegmentation for Flurry Publisher Segmentation**
+
+  ```c
+  void Fetch();
+  void RegisterListener  (IPublisherSegmentationListener publisherSegmentationListener);
+  void UnregisterListener(IPublisherSegmentationListener publisherSegmentationListener);
+  IDictionary<string, string> GetData();
+
+  interface IPublisherSegmentationListener
+  {
+      void OnFetched(IDictionary<string, string> data);
   }
   ```
 

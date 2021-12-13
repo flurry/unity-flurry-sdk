@@ -27,9 +27,9 @@ namespace FlurrySDKInternal
 
             public abstract void WithAppVersion(string appVersion);
 
-            public abstract void WithCrashReporting(bool crashReporting);
-
             public abstract void WithContinueSessionMillis(long sessionMillis);
+
+            public abstract void WithCrashReporting(bool crashReporting);
 
             public abstract void WithIncludeBackgroundSessionsInMetrics(bool includeBackgroundSessionsInMetrics);
 
@@ -42,6 +42,8 @@ namespace FlurrySDKInternal
             public abstract void WithDataSaleOptOut(bool isOptOut);
 
             public abstract void WithPerformanceMetrics(int performanceMetrics);
+
+            public abstract void WithSslPinningEnabled(bool sslPinningEnabled);
         }
 
         public abstract class AgentUserProperties
@@ -71,6 +73,38 @@ namespace FlurrySDKInternal
 
             public abstract void LogResourceLogger(string id);
         }
+
+        public abstract class AgentConfig
+        {
+            public abstract void Fetch();
+
+            public abstract void Activate();
+
+            public abstract void SetListener(FlurrySDK.Flurry.IConfigListener configListener);
+
+            public abstract string GetString(string key, string defaultValue);
+        }
+
+        public abstract class AgentPublisherSegmentation
+        {
+            public abstract void Fetch();
+
+            public abstract void SetListener(FlurrySDK.Flurry.IPublisherSegmentationListener publisherSegmentationListener);
+
+            public abstract IDictionary<string, string> GetData();
+        }
+
+        public abstract void SetContinueSessionMillis(long sessionMillis);
+
+        public abstract void SetCrashReporting(bool crashReporting);
+
+        public abstract void SetIncludeBackgroundSessionsInMetrics(bool includeBackgroundSessionsInMetrics);
+
+        public abstract void SetLogEnabled(bool enableLog);
+
+        public abstract void SetLogLevel(FlurrySDK.Flurry.LogLevel logLevel);
+
+        public abstract void SetSslPinningEnabled(bool sslPinningEnabled);
 
         public abstract void SetAge(int age);
 
@@ -133,12 +167,15 @@ namespace FlurrySDKInternal
 
         public abstract void UpdateConversionValueWithEvent(FlurrySDK.Flurry.SKAdNetworkEvent flurryEvent);
 
-        public abstract void SetMessagingListener(FlurrySDK.Flurry.IFlurryMessagingListener flurryMessagingListener);
+        public abstract void SetMessagingListener(FlurrySDK.Flurry.IMessagingListener messagingListener);
 
+        [Obsolete("please use PublisherSegmentation.GetData() instead of GetPublisherSegmentation()")]
         public abstract IDictionary<string, string> GetPublisherSegmentation();
 
+        [Obsolete("please use PublisherSegmentation.Fetch() instead of FetchPublisherSegmentation()")]
         public abstract void FetchPublisherSegmentation();
 
+        [Obsolete("please use PublisherSegmentation.RegisterListener() instead of SetPublisherSegmentationListener()")]
         public abstract void SetPublisherSegmentationListener(FlurrySDK.Flurry.IFlurryPublisherSegmentationListener flurryPublisherSegmentationListener);
 
         public abstract void Dispose();

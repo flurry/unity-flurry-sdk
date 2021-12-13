@@ -26,7 +26,8 @@ namespace FlurrySDKInternal
 {
     public class FlurryAgentIOS : FlurryAgent
     {
-        static FlurrySDK.Flurry.IFlurryPublisherSegmentationListener _flurryPublisherSegmentationListener;
+        static FlurrySDK.Flurry.IFlurryPublisherSegmentationListener _publisherSegmentationListener;
+        static FlurrySDK.Flurry.IMessagingListener _messagingListener;
 
         public FlurryAgentIOS()
         {
@@ -62,6 +63,12 @@ namespace FlurrySDKInternal
 
         [DllImport("__Internal")]
         private static extern void flurryStartSessionWithSessionBuilder(string apiKey);
+
+        [DllImport("__Internal")]
+        private static extern void flurrySetSessionContinueSeconds(long sessionSeconds);
+
+        [DllImport("__Internal")]
+        private static extern void flurrySetIncludeBackgroundSessionsInMetrics(bool includeBackgroundSessionsInMetrics);
        
         [DllImport("__Internal")]
         private static extern void flurrySetAge(int age);
@@ -139,6 +146,10 @@ namespace FlurrySDKInternal
         private static extern void flurryLogBreadcrumb(string crashBreadcrumb);
 
         [DllImport("__Internal")]
+        private static extern void flurryLogPayment(string productName, string productId, int quantity, double price,
+                                                    string currency, string transactionId, string keys, string values);
+
+        [DllImport("__Internal")]
         private static extern void flurrySetIAPReportingEnabled(bool isEnabled);
 
         [DllImport("__Internal")]
@@ -181,11 +192,54 @@ namespace FlurrySDKInternal
         private static extern string flurryGetPublisherData();
 
         [DllImport("__Internal")]
-        public static extern void flurryRegisterOnFetchedCallback(IntPtr handler);    
-        
+        private static extern void flurryRegisterOnFetchedCallback(IntPtr handler);
+
+        [DllImport("__Internal")]
+        private static extern void flurryRegisterOnPSFetchedCallback(IntPtr handler);
+
+        [DllImport("__Internal")]
+        private static extern void flurrySetConfigListener();   
+
+        [DllImport("__Internal")]
+        private static extern void flurryRegisterConfigCallback(IntPtr handler1, IntPtr handler2, IntPtr handler3, IntPtr handler4);
+
+        [DllImport("__Internal")]
+        private static extern void flurryConfigFetch();
+
+        [DllImport("__Internal")]
+        private static extern void flurryConfigActivate();
+
+        [DllImport("__Internal")]
+        private static extern string flurryConfigGetString(string key, string defaultValue);
+
+        [DllImport("__Internal")]
+        private static extern void flurryRegisterMessagingCallback(IntPtr handler1, IntPtr handler2);
+
+
         //declare method marked with delegate indicating this is a callback
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void OnFetched(string data);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate void OnPSFetched(string data);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate void OnConfigFetched();
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate void OnConfigFetchNoChange();
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate void OnConfigFetchFailed();
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate void OnConfigActivated();
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate void OnNotificationReceived(string title, string body, string sound, string data);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate void OnNotificationClicked(string title, string body, string sound, string data);
 
 
         public class AgentBuilderIOS : AgentBuilder
@@ -247,6 +301,11 @@ namespace FlurrySDKInternal
             public override void WithPerformanceMetrics(int performanceMetrics)
             {
                 Debug.Log("Flurry iOS SDK does not implement WithPerformanceMetrics method.");
+            }
+
+            public override void WithSslPinningEnabled(bool sslPinningEnabled)
+            {
+                Debug.Log("Flurry iOS SDK does not implement WithSslPinningEnabled method.");
             }
         }
 
@@ -320,6 +379,179 @@ namespace FlurrySDKInternal
             }
         }
 
+        public class AgentConfigIOS : AgentConfig
+        {
+            static FlurrySDK.Flurry.IConfigListener _listener;
+
+            public override void Fetch()
+            {
+
+                flurryConfigFetch();
+            }
+
+            public override void Activate()
+            {
+                flurryConfigActivate();
+            }
+
+            public override void SetListener(FlurrySDK.Flurry.IConfigListener configListener)
+            {
+                if (configListener != null)
+                {
+                    _listener = configListener;
+                    // create function ptr for each callback
+                    OnConfigFetched handler1 = new OnConfigFetched(onConfigFetchedHandler);
+                    IntPtr pointer1 = Marshal.GetFunctionPointerForDelegate(handler1);
+
+                    OnConfigFetchNoChange handler2 = new OnConfigFetchNoChange(onConfigFetchNoChangeHandler);
+                    IntPtr pointer2 = Marshal.GetFunctionPointerForDelegate(handler2);
+
+                    OnConfigFetchFailed handler3 = new OnConfigFetchFailed(onConfigFetchFailedHandler);
+                    IntPtr pointer3 = Marshal.GetFunctionPointerForDelegate(handler3);
+
+                    OnConfigActivated handler4 = new OnConfigActivated(onConfigActivatedHandler);
+                    IntPtr pointer4 = Marshal.GetFunctionPointerForDelegate(handler4);
+
+                    // call objC method to pass the ptr
+                    flurryRegisterConfigCallback(pointer1, pointer2, pointer3, pointer4);
+                    flurrySetConfigListener();
+                }
+            }
+
+            public override string GetString(string key, string defaultValue)
+            {
+                string res = flurryConfigGetString(key, defaultValue);
+                return res;
+            }
+
+            [MonoPInvokeCallback(typeof(OnConfigFetched))]
+            static void onConfigFetchedHandler() 
+            {
+                Debug.Log("On config fetched.");
+                if(_listener != null){
+                    _listener.OnFetchSuccess();
+                }
+
+            }
+
+            [MonoPInvokeCallback(typeof(OnConfigFetchNoChange))]
+            static void onConfigFetchNoChangeHandler() 
+            {
+                Debug.Log("On Config fetch no change.");
+                if(_listener != null){
+                    _listener.OnFetchNoChange();
+                }
+
+            }
+
+            [MonoPInvokeCallback(typeof(OnConfigFetchFailed))]
+            static void onConfigFetchFailedHandler() 
+            {
+                Debug.Log("On config fetch failed.");
+                if(_listener != null){
+                    _listener.OnFetchError(false);
+                }
+
+            }
+
+            [MonoPInvokeCallback(typeof(OnConfigActivated))]
+            static void onConfigActivatedHandler() 
+            {
+                Debug.Log("On config activated.");
+                if(_listener != null){
+                    _listener.OnActivateComplete(true);
+                }
+            }
+        }
+
+        public class AgentPublisherSegmentationIOS : AgentPublisherSegmentation
+        {
+            static FlurrySDK.Flurry.IPublisherSegmentationListener _listener;
+
+            public override void Fetch()
+            {
+                flurryFetchPublisherSegmentation();
+            }
+
+            public override void SetListener(FlurrySDK.Flurry.IPublisherSegmentationListener publisherSegmentationListener)
+            {
+                if (publisherSegmentationListener != null)
+                {
+                    _listener = publisherSegmentationListener;
+                    // create function ptr
+                    OnPSFetched handler = new OnPSFetched(OnPSFetchedHandler);
+                    IntPtr pointer = Marshal.GetFunctionPointerForDelegate(handler);
+                    // call objC method to pass the ptr
+                    flurryRegisterOnPSFetchedCallback(pointer);
+                    flurrySetPublisherSegmentationListener();
+                }
+            }
+
+            public override IDictionary<string, string> GetData()
+            {
+                string rawString = flurryGetPublisherData();
+                IDictionary<string, string> map = new Dictionary<string, string>();
+                ToDictionary(rawString, out map);
+                return map;
+            }
+
+            //Implement callback marked MonoPInvokeCallback lets objC callback using function ptr
+            [MonoPInvokeCallback(typeof(OnPSFetched))]
+            static void OnPSFetchedHandler(string data)
+            {
+                Debug.Log("OnFetched Data - " + data );
+                IDictionary<string, string> map = new Dictionary<string, string>();
+                ToDictionary(data, out map);
+                if(_listener != null){
+                    _listener.OnFetched(map);
+                }
+
+            }
+
+            private static void ToDictionary(string rawString, out IDictionary<string, string> dictionary){
+                IDictionary<string, string> d = new Dictionary<string, string>();
+                string[] pairs = rawString.Split(';');
+                foreach (var pair in pairs){
+                    string[] components = pair.Split(':');
+                    string key = components[0];
+                    string val = components[1];
+                    d.Add(key, val);
+                }
+                dictionary = d;
+            }
+
+        }
+
+        public override void SetContinueSessionMillis(long sessionMillis)
+        {
+            flurrySetSessionContinueSeconds(sessionMillis / 1000);
+        }
+
+        public override void SetCrashReporting(bool crashReporting)
+        {
+            Debug.Log("Flurry iOS SDK does not implement SetCrashReporting method.");
+        }
+
+        public override void SetIncludeBackgroundSessionsInMetrics(bool includeBackgroundSessionsInMetrics)
+        {
+            flurrySetIncludeBackgroundSessionsInMetrics(includeBackgroundSessionsInMetrics);
+        }
+
+        public override void SetLogEnabled(bool enableLog)
+        {
+            Debug.Log("Flurry iOS SDK does not implement SetLogEnabled method.");
+        }
+
+        public override void SetLogLevel(FlurrySDK.Flurry.LogLevel logLevel)
+        {
+            Debug.Log("Flurry iOS SDK does not implement SetLogLevel method.");
+        }
+
+        public override void SetSslPinningEnabled(bool sslPinningEnabled)
+        {
+            Debug.Log("Flurry iOS SDK does not implement SetSslPinningEnabled method.");
+        }
+
         public override void SetAge(int age)
         {
            flurrySetAge(age);
@@ -354,7 +586,7 @@ namespace FlurrySDKInternal
 
         public override void SetVersionName(string versionName)
         {
-            Debug.Log("Android only. For iOS, please also call Flurry.Builder.WithAppVersion().");
+            flurrySetVersionName(versionName);
         }
 
         public override void AddOrigin(string originName, string originVersion)
@@ -498,7 +730,9 @@ namespace FlurrySDKInternal
         public override int LogPayment(string productName, string productId, int quantity, double price,
                                        string currency, string transactionId, IDictionary<string, string> parameters)
         {
-            Debug.Log("Flurry iOS SDK does not implement LogPayment method.");
+            string keys, values;
+            ToKeyValue(parameters, out keys, out values);
+            flurryLogPayment(productName, productId, quantity, price, currency, transactionId, keys, values);
             return 1;
         }
 
@@ -517,11 +751,66 @@ namespace FlurrySDKInternal
            flurryUpdateConversionValueWithEvent((int)flurryEvent);
         }
 
-        public override void SetMessagingListener(FlurrySDK.Flurry.IFlurryMessagingListener flurryMessagingListener)
+        public override void SetMessagingListener(FlurrySDK.Flurry.IMessagingListener messagingListener)
         {
-            Debug.Log("iOS does not make use of the flurryMessagingListener. This is handled by delegate methods didReceiveMessage and didReceiveActionWithIdentifier in FlurryUnityPlugin.mm");
+            if(messagingListener != null){
+
+                _messagingListener = messagingListener;
+
+                // create function ptr
+                OnNotificationReceived handler1 = new OnNotificationReceived(OnNotificationReceivedHandler);
+                IntPtr pointer1 = Marshal.GetFunctionPointerForDelegate(handler1);
+
+                OnNotificationClicked handler2 = new OnNotificationClicked(OnNotificationClickedHandler);
+                IntPtr pointer2 = Marshal.GetFunctionPointerForDelegate(handler2);
+
+                // call objC method to pass the ptr
+                flurryRegisterMessagingCallback(pointer1, pointer2);
+                flurrySetupMessagingWithAutoIntegration();
+            }
         }
 
+        [MonoPInvokeCallback(typeof(OnNotificationReceived))]
+        static void OnNotificationReceivedHandler(string title, string body, string sound, string data) 
+        {
+
+            IDictionary<string, string> appData = new Dictionary<string, string>();
+            ToDictionary(data, out appData);
+
+            FlurrySDK.Flurry.FlurryMessage message = new FlurrySDK.Flurry.FlurryMessage
+            {
+                Title = title,
+                Body = body,
+                ClickAction = sound,
+                Data = appData,
+            };
+            
+            if(_messagingListener != null){
+                _messagingListener.OnNotificationReceived(message);
+            }
+        }
+
+        [MonoPInvokeCallback(typeof(OnNotificationClicked))]
+        static void OnNotificationClickedHandler(string title, string body, string sound, string data) 
+        {
+            IDictionary<string, string> appData = new Dictionary<string, string>();
+            ToDictionary(data, out appData);
+
+            FlurrySDK.Flurry.FlurryMessage message = new FlurrySDK.Flurry.FlurryMessage
+            {
+                Title = title,
+                Body = body,
+                ClickAction = sound,
+                Data = appData,
+            };
+            
+            if(_messagingListener != null){
+                _messagingListener.OnNotificationClicked(message);
+            }
+        }
+
+
+        [Obsolete("please use PublisherSegmentation.GetData() instead of GetPublisherSegmentation()")]
         public override IDictionary<string, string> GetPublisherSegmentation()
         {
             string rawString = flurryGetPublisherData();
@@ -530,14 +819,16 @@ namespace FlurrySDKInternal
             return map;
         }
 
+        [Obsolete("please use PublisherSegmentation.Fetch() instead of FetchPublisherSegmentation()")]
         public override void FetchPublisherSegmentation()
         {
             flurryFetchPublisherSegmentation();
         }
 
-        public override void SetPublisherSegmentationListener(FlurrySDK.Flurry.IFlurryPublisherSegmentationListener flurryPublisherSegmentationListener)
+        [Obsolete("please use PublisherSegmentation.RegisterListener() instead of SetPublisherSegmentationListener()")]
+        public override void SetPublisherSegmentationListener(FlurrySDK.Flurry.IFlurryPublisherSegmentationListener publisherSegmentationListener)
         {
-            _flurryPublisherSegmentationListener = flurryPublisherSegmentationListener;
+            _publisherSegmentationListener = publisherSegmentationListener;
             // create function ptr
             OnFetched handler = new OnFetched(onFetchedHandler);
             IntPtr pointer = Marshal.GetFunctionPointerForDelegate(handler);
@@ -553,8 +844,8 @@ namespace FlurrySDKInternal
             Debug.Log("OnFetched Data - " + data );
             IDictionary<string, string> map = new Dictionary<string, string>();
             ToDictionary(data, out map);
-            if(_flurryPublisherSegmentationListener != null){
-                _flurryPublisherSegmentationListener.OnFetched(map);
+            if(_publisherSegmentationListener != null){
+                _publisherSegmentationListener.OnFetched(map);
             }
 
         }

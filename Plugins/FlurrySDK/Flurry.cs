@@ -207,6 +207,22 @@ namespace FlurrySDK
                 }
                 return this;
             }
+
+            /// <summary>
+            /// True to enable or false to disable SSL Pinning for Flurry Analytics connection.Defaults to false.
+            /// Turn on to add SSL Pinning protection for the Flurry Analytics connections. Disable it
+            /// if your app is using proxy or any services that are not compliant with SSL Pinning.
+            /// </summary>
+            /// <returns>The builder.</returns>
+            /// <param name="sslPinningEnabled">true to enable SSL Pinning for Flurry Analytics connection, false to disable it.</param>
+            public Builder WithSslPinningEnabled(bool sslPinningEnabled)
+            {
+                if (builder != null)
+                {
+                    builder.WithSslPinningEnabled(sslPinningEnabled);
+                }
+                return this;
+            }
         }
 
         /// <summary>
@@ -427,6 +443,167 @@ namespace FlurrySDK
         }
 
         /// <summary>
+        /// Flurry Config
+        /// </summary>
+        public class Config
+        {
+            // init static Flurry Config object.
+            private static FlurryAgent.AgentConfig config;
+            private static List<IConfigListener> listeners = new List<IConfigListener>();
+            private static IConfigListener mainListener = null;
+            static Config()
+            {
+#if UNITY_ANDROID
+                if (Application.platform == RuntimePlatform.Android)
+                {
+                    config = new FlurryAgentAndroid.AgentConfigAndroid();
+                }
+#elif UNITY_IPHONE
+                if (Application.platform == RuntimePlatform.IPhonePlayer)
+                {
+                    config = new FlurryAgentIOS.AgentConfigIOS();
+                }
+#else
+                config = null;
+#endif
+            }
+
+            // The internal Config listener.
+            private class MainConfigListener : IConfigListener
+            {
+                public void OnFetchSuccess()
+                {
+                    foreach (var listener in listeners)
+                    {
+                        listener.OnFetchSuccess();
+                    }
+                }
+
+                public void OnFetchNoChange()
+                {
+                    foreach (var listener in listeners)
+                    {
+                        listener.OnFetchNoChange();
+                    }
+                }
+
+                public void OnFetchError(bool isRetrying)
+                {
+                    foreach (var listener in listeners)
+                    {
+                        listener.OnFetchError(isRetrying);
+                    }
+                }
+
+                public void OnActivateComplete(bool isCache)
+                {
+                    foreach (var listener in listeners)
+                    {
+                        listener.OnActivateComplete(isCache);
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Fetch Flurry Config.
+            /// </summary>
+            public static void Fetch()
+            {
+                if (config != null)
+                {
+                    config.Fetch();
+                }
+            }
+
+            /// <summary>
+            /// Activate Flurry Config data.
+            /// </summary>
+            public static void Activate()
+            {
+                if (config != null)
+                {
+                    config.Activate();
+                }
+            }
+
+            /// <summary>
+            /// Registere Flurry Config listener.
+            /// </summary>
+            /// <param name="configListener">The Flurry Config listener.</param>
+            public static void RegisterListener(IConfigListener configListener)
+            {
+                if (config != null)
+                {
+                    listeners.Add(configListener);
+                    if (mainListener == null)
+                    {
+                        mainListener = new MainConfigListener();
+                        config.SetListener(mainListener);
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Unregistere Flurry Config listener.
+            /// </summary>
+            /// <param name="configListener">The Flurry Config listener.</param>
+            public static void UnregisterListener(IConfigListener configListener)
+            {
+                if (config != null)
+                {
+                    listeners.Remove(configListener);
+                }
+            }
+
+            /// <summary>
+            /// Get Flurry Config string.
+            /// </summary>
+            /// <param name="key">The Flurry Config key.</param>
+            /// <param name="defaultValue">The Flurry Config default value.</param>
+            public static string GetString(string key, string defaultValue)
+            {
+                if (config != null)
+                {
+                    return config.GetString(key, defaultValue);
+                }
+
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Listener to be notified when the Flurry Config data have been fetched or activatede.
+        /// </summary>
+        public interface IConfigListener
+        {
+            /// <summary>
+            /// Config data is successfully loaded from server.
+            /// </summary>
+            void OnFetchSuccess();
+
+            /// <summary>
+            /// Fetch completes but no changes from server.
+            /// </summary>
+            void OnFetchNoChange();
+
+            /// <summary>
+            /// Config data is failed to load from server.
+            /// Flurry Config will retry if failed in 10 sec., 30 sec., 3 min., then abandon.
+            /// </summary>
+            /// <param name="isRetrying">true if it is still retrying fetching.</param>
+            void OnFetchError(bool isRetrying);
+
+            /// <summary>
+            /// Config data is activated.
+            /// Flurry Config can receive activate notification when cached data is read,
+            /// and when newly fetched data is been activated.
+            /// </summary>
+            /// <param name="isCache">Ftrue if activated from the cached data.</param>
+            void OnActivateComplete(bool isCache);
+
+        }
+
+        /// <summary>
         /// Flurry message.
         /// </summary>
         public class FlurryMessage
@@ -440,7 +617,7 @@ namespace FlurrySDK
         /// <summary>
         /// If listener is set, Flurry will call this method to notify you a notification has been received.
         /// </summary>
-        public interface IFlurryMessagingListener
+        public interface IMessagingListener
         {
             /// <summary>
             /// If listener is set, Flurry will call this method to notify you
@@ -489,9 +666,109 @@ namespace FlurrySDK
         }
 
         /// <summary>
+        /// If listener is set, Flurry will call this method to notify you a notification has been received.
+        /// </summary>
+        [Obsolete("please use IMessagingListener instead of IFlurryMessagingListener")]
+        public interface IFlurryMessagingListener : IMessagingListener
+        {
+        }
+
+        /// <summary>
+        /// Flurry Publisher Segmentation
+        /// </summary>
+        public class PublisherSegmentation
+        {
+            // init static Flurry Publisher Segmentation object.
+            private static FlurryAgent.AgentPublisherSegmentation publisherSegmentation;
+            private static List<IPublisherSegmentationListener> listeners = new List<IPublisherSegmentationListener>();
+            private static IPublisherSegmentationListener mainListener = null;
+            static PublisherSegmentation()
+            {
+#if UNITY_ANDROID
+                if (Application.platform == RuntimePlatform.Android)
+                {
+                    publisherSegmentation = new FlurryAgentAndroid.AgentPublisherSegmentationAndroid();
+                }
+#elif UNITY_IPHONE
+                if (Application.platform == RuntimePlatform.IPhonePlayer)
+                {
+                    publisherSegmentation = new FlurryAgentIOS.AgentPublisherSegmentationIOS();
+                }
+#else
+                publisherSegmentation = null;
+#endif
+            }
+
+            // The internal Publisher Segmentation listener.
+            private class MainPublisherSegmentationListener : IPublisherSegmentationListener
+            {
+                public void OnFetched(IDictionary<string, string> data)
+                {
+                    foreach (var listener in listeners)
+                    {
+                        listener.OnFetched(data);
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Fetch Publisher Segmentation data.
+            /// </summary>
+            public static void Fetch()
+            {
+                if (publisherSegmentation != null)
+                {
+                    publisherSegmentation.Fetch();
+                }
+            }
+
+            /// <summary>
+            /// Registere Flurry Publisher Segmentation listener.
+            /// </summary>
+            /// <param name="publisherSegmentationListener">The Flurry Publisher Segmentation listener.</param>
+            public static void RegisterListener(IPublisherSegmentationListener publisherSegmentationListener)
+            {
+                if (publisherSegmentation != null)
+                {
+                    listeners.Add(publisherSegmentationListener);
+                    if (mainListener == null)
+                    {
+                        mainListener = new MainPublisherSegmentationListener();
+                        publisherSegmentation.SetListener(mainListener);
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Unregistere Flurry Publisher Segmentation listener.
+            /// </summary>
+            /// <param name="publisherSegmentationListener">The Flurry Publisher Segmentation listener.</param>
+            public static void UnregisterListener(IPublisherSegmentationListener publisherSegmentationListener)
+            {
+                if (publisherSegmentation != null)
+                {
+                    listeners.Remove(publisherSegmentationListener);
+                }
+            }
+
+            /// <summary>
+            /// Get Publisher Segmentation data without fetch; cached or newly fetched.
+            /// </summary>
+            public static IDictionary<string, string> GetData()
+            {
+                if (publisherSegmentation != null)
+                {
+                    return publisherSegmentation.GetData();
+                }
+
+                return null;
+            }
+        }
+
+        /// <summary>
         /// Listener to be notified when the Publisher Segmentation data have been fetched and ready to use.
         /// </summary>
-        public interface IFlurryPublisherSegmentationListener
+        public interface IPublisherSegmentationListener
         {
             /// <summary>
             /// Publisher Segmentation data is fetched and ready to use.
@@ -499,6 +776,90 @@ namespace FlurrySDK
             /// <param name="data">Fetched data.</param>
             void OnFetched(IDictionary<string, string> data);
 
+        }
+
+        /// <summary>
+        /// Listener to be notified when the Publisher Segmentation data have been fetched and ready to use.
+        /// </summary>
+        [Obsolete("please use IPublisherSegmentationListener instead of IFlurryPublisherSegmentationListener")]
+        public interface IFlurryPublisherSegmentationListener : IPublisherSegmentationListener
+        {
+        }
+
+        /// <summary>
+        /// Set the timeout for expiring a Flurry session.
+        /// </summary>
+        /// <param name="sessionMillis"> The time in milliseconds to set the session timeout to. Minimum value of 5000.</param>
+        public static void SetContinueSessionMillis(long sessionMillis)
+        {
+            if (flurryAgent != null)
+            {
+                flurryAgent.SetContinueSessionMillis(sessionMillis);
+            }
+        }
+
+        /// <summary>
+        /// True to enable or false to disable the ability to catch all uncaught exceptions
+        /// and have them reported back to Flurry.
+        /// </summary>
+        /// <param name="crashReporting"> True to enable, false to disable.</param>
+        public static void SetCrashReporting(bool crashReporting)
+        {
+            if (flurryAgent != null)
+            {
+                flurryAgent.SetCrashReporting(crashReporting);
+            }
+        }
+
+        /// <summary>
+        /// True if this session should be added to total sessions/DAUs when applicationstate is inactive or background.
+        /// </summary>
+        /// <param name="includeBackgroundSessionsInMetrics"> If background and inactive session should be counted toward dau</param>
+        public static void SetIncludeBackgroundSessionsInMetrics(bool includeBackgroundSessionsInMetrics)
+        {
+            if (flurryAgent != null)
+            {
+                flurryAgent.SetIncludeBackgroundSessionsInMetrics(includeBackgroundSessionsInMetrics);
+            }
+        }
+
+        /// <summary>
+        /// True to enable or false to disable the internal logging for the Flurry SDK.
+        /// </summary>
+        /// <param name="enableLog"> True to enable logging, false to disable it.</param>
+        public static void SetLogEnabled(bool enableLog)
+        {
+            if (flurryAgent != null)
+            {
+                flurryAgent.SetLogEnabled(enableLog);
+            }
+        }
+
+        /// <summary>
+        /// Set the log level of the internal Flurry SDK logging.
+        /// </summary>
+        ///<param name="logLevel"> The level to set it to { VERBOSE, DEBUG, INFO, WARN, ERROR, ASSERT }.</param>
+        public static void SetLogLevel(FlurrySDK.Flurry.LogLevel logLevel)
+        {
+            if (flurryAgent != null)
+            {
+                flurryAgent.SetLogLevel(logLevel);
+            }
+        }
+
+        /// <summary>
+        /// True to enable or  false to disable SSL Pinning for Flurry Analytics connection. Defaults to false.
+        ///
+        /// Turn on to add SSL Pinning protection for the Flurry Analytics connections. Disable it
+        /// if your app is using proxy or any services that are not compliant with SSL Pinning.
+        /// </summary>
+        /// <param name="sslPinningEnabled"> True to enable SSL Pinning for Flurry Analytics connection, false to disable it.</param>
+        public static void SetSslPinningEnabled(bool sslPinningEnabled)
+        {
+            if (flurryAgent != null)
+            {
+                flurryAgent.SetSslPinningEnabled(sslPinningEnabled);
+            }
         }
 
         /// <summary>
@@ -920,7 +1281,7 @@ namespace FlurrySDK
         /// The last four bits represent a true false state indicating if the user has completed the post install event.
         /// </summary>
         /// <param name="flurryEvent">Valid events are NoEvent, Registration, LogIn, Subscription, and InAppPurchase.</param>
-        public static void UpdateConversionValueWithEvent(FlurrySDK.Flurry.SKAdNetworkEvent flurryEvent)
+        public static void UpdateConversionValueWithEvent(SKAdNetworkEvent flurryEvent)
         {
             if (flurryAgent != null)
             {
@@ -931,18 +1292,19 @@ namespace FlurrySDK
         /// <summary>
         /// Set a listener to listen notification events.
         /// </summary>
-        /// <param name="flurryMessagingListener">Flurry messaging listener.</param>
-        public static void SetMessagingListener(IFlurryMessagingListener flurryMessagingListener)
+        /// <param name="messagingListener">Flurry messaging listener.</param>
+        public static void SetMessagingListener(IMessagingListener messagingListener)
         {
             if (flurryAgent != null)
             {
-                flurryAgent.SetMessagingListener(flurryMessagingListener);
+                flurryAgent.SetMessagingListener(messagingListener);
             }
         }
 
         /// <summary>
         /// Get Publisher Segmentation data without fetch; cached or newly fetched.
         /// </summary>
+        [Obsolete("please use PublisherSegmentation.GetData() instead of GetPublisherSegmentation()")]
         public static IDictionary<string, string> GetPublisherSegmentation()
         {
             if (flurryAgent != null)
@@ -956,6 +1318,7 @@ namespace FlurrySDK
         /// <summary>
         /// Fetch Publisher Segmentation data.
         /// </summary>
+        [Obsolete("please use PublisherSegmentation.Fetch() instead of FetchPublisherSegmentation()")]
         public static void FetchPublisherSegmentation()
         {
             if (flurryAgent != null)
@@ -968,6 +1331,7 @@ namespace FlurrySDK
         /// Set a listener to listen Publisher Segmentation data request.
         /// </summary>
         /// <param name="flurryPublisherSegmentationListener">Flurry Publisher Segmentation listener.</param>
+        [Obsolete("please use PublisherSegmentation.RegisterListener() instead of SetPublisherSegmentationListener()")]
         public static void SetPublisherSegmentationListener(IFlurryPublisherSegmentationListener flurryPublisherSegmentationListener)
         {
             if (flurryAgent != null)
