@@ -6,24 +6,11 @@
     android:versionCode="1"
     android:versionName="1.0">
 
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
-        android:name="com.flurry.android.FlurryUnityApplication"
         android:label="@string/app_name"
         android:icon="@drawable/app_icon">
-        
-        <!-- Flurry Agent settings; please update -->
-        <meta-data android:name="flurry_apikey" android:value="FLURRY_ANDROID_API_KEY" />
-        <meta-data android:name="flurry_with_crash_reporting" android:value="true" />
-        <meta-data android:name="flurry_with_continue_session_millis" android:value="10000L" />
-        <meta-data android:name="flurry_with_include_background_sessions_in_metrics" android:value="true" />
-        <meta-data android:name="flurry_with_log_enabled" android:value="true" />
-        <meta-data android:name="flurry_with_log_level" android:value="2" />
-        <meta-data android:name="flurry_with_messaging" android:value="true" />
         
         <!-- Unity Player Activity; replace with yours if needed -->
         <activity
@@ -42,15 +29,10 @@
         </activity>
 
         <!-- Flurry Messaging services; do not modify -->
-        <service android:name="com.flurry.android.marketing.messaging.FCM.FlurryMessageListenerService">
+        <service android:name="com.flurry.android.marketing.messaging.FCM.FlurryMessageListenerService"
+            android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
-
-        <service android:name="com.flurry.android.marketing.messaging.FCM.FlurryInstanceIDListenerService">
-            <intent-filter>
-                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
 
@@ -69,3 +51,4 @@
     </application>
     
 </manifest>
+

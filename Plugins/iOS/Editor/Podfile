@@ -1,0 +1,22 @@
+platform :ios, '10.0'
+
+
+target 'UnityFramework' do
+    use_frameworks!
+    pod 'Flurry-iOS-SDK/FlurrySDK', '12.0.0'
+    pod 'Flurry-iOS-SDK/FlurryMessaging', '12.0.0'
+    pod 'Flurry-iOS-SDK/FlurryConfig', '12.0.0'
+end
+
+post_install do |installer|
+    installer.pods_project.targets.each do |target|
+        if target.name == "Pods-UnityFramework"
+            target.build_configurations.each do |config|
+                xcconfig_path = config.base_configuration_reference.real_path
+                xcconfig = File.read(xcconfig_path)
+                new_xcconfig = xcconfig.sub('OTHER_LDFLAGS = $(inherited) -framework "CrashReporter" -framework "Flurry" -framework "FlurryConfig" -framework "FlurryMessaging" -framework "Foundation" -framework "Security" -framework "SystemConfiguration" -framework "UIKit"', 'OTHER_LDFLAGS = $(inherited) -framework "CrashReporter" -l "Flurry" -l "FlurryConfig" -l "FlurryMessaging" -framework "Foundation" -framework "Security" -framework "SystemConfiguration" -framework "UIKit"')
+                File.open(xcconfig_path, "w") { |file| file << new_xcconfig }
+            end
+        end
+    end
+end

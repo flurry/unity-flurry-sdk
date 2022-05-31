@@ -15,19 +15,7 @@
  */
 
 #import <UIKit/UIKit.h>
-#import "Flurry.h"
-#if __has_include("FConfig.h")
-#import "FConfig.h"
-#endif
 
-#if __has_include("FConfig.h")
-@interface FlurryUnityPlugin : NSObject <FlurryFetchObserver, FConfigObserver>
-#else
-@interface FlurryUnityPlugin : NSObject <FlurryFetchObserver>
-#endif
-
-
-+ (FlurryUnityPlugin*) shared;
-- (void) setupFlurryAutoMessaging;
+@interface FlurryUnityPlugin : NSObject
 
 @end

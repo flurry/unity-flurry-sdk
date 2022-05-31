@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Oath Inc.
+ * Copyright 2022, Yahoo Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -171,11 +171,11 @@ namespace FlurrySDK
             /// </summary>
             /// <returns>The builder.</returns>
             /// <param name="enableMessaging">If set to <c>true</c> to enable messaging.</param>
-            public Builder WithMessaging(bool enableMessaging = true)
+            public Builder WithMessaging(bool enableMessaging = true, IMessagingListener messagingListener = null)
             {
                 if (builder != null)
                 {
-                    builder.WithMessaging(enableMessaging);
+                    builder.WithMessaging(enableMessaging, messagingListener);
                 }
                 return this;
             }
@@ -1293,6 +1293,7 @@ namespace FlurrySDK
         /// Set a listener to listen notification events.
         /// </summary>
         /// <param name="messagingListener">Flurry messaging listener.</param>
+        [Obsolete("please use Builder().WithMessaging() instead of SetMessagingListener()")]
         public static void SetMessagingListener(IMessagingListener messagingListener)
         {
             if (flurryAgent != null)

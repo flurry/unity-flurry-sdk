@@ -83,7 +83,8 @@ namespace FlurrySDK
             FlurryEventParamsCountExceeded,
             FlurryEventLogCountExceeded,
             FlurryEventLoggingDelayed,
-            FlurryEventAnalyticsDisabled
+            FlurryEventAnalyticsDisabled,
+            FlurryEventParametersMismatched
         }
 
         /// <summary>

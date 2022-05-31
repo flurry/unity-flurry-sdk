@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Oath Inc.
+ * Copyright 2022, Yahoo Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -290,11 +290,24 @@ namespace FlurrySDKInternal
                 flurryWithAppVersion(appVersion);
             }
 
-            public override void WithMessaging(bool enableMessaging)
+            public override void WithMessaging(bool enableMessaging, FlurrySDK.Flurry.IMessagingListener messagingListener)
             {
-                if (enableMessaging)
-                {
-                    flurrySetupMessagingWithAutoIntegration();
+                if (enableMessaging){
+                    if(messagingListener != null){
+
+                        _messagingListener = messagingListener;
+
+                        // create function ptr
+                        OnNotificationReceived handler1 = new OnNotificationReceived(OnNotificationReceivedHandler);
+                        IntPtr pointer1 = Marshal.GetFunctionPointerForDelegate(handler1);
+
+                        OnNotificationClicked handler2 = new OnNotificationClicked(OnNotificationClickedHandler);
+                        IntPtr pointer2 = Marshal.GetFunctionPointerForDelegate(handler2);
+
+                        // call objC method to pass the ptr
+                        flurryRegisterMessagingCallback(pointer1, pointer2);
+                        flurrySetupMessagingWithAutoIntegration();
+                    }
                 }
             }
 
@@ -751,6 +764,7 @@ namespace FlurrySDKInternal
            flurryUpdateConversionValueWithEvent((int)flurryEvent);
         }
 
+        [Obsolete("please use Builder().WithMessaging() instead of SetMessagingListener()")]
         public override void SetMessagingListener(FlurrySDK.Flurry.IMessagingListener messagingListener)
         {
             if(messagingListener != null){

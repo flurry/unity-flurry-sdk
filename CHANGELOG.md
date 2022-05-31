@@ -3,6 +3,19 @@
 * [Flurry Android SDK Release Notes](https://developer.yahoo.com/flurry/docs/releasenotes/android/)
 * [Flurry iOS SDK Release Notes](https://developer.yahoo.com/flurry/docs/releasenotes/ios/)
 
+# v5.0.0 (2022-06-02)
+
+#### Features
+
+* Upgrade Flurry Android SDK version to 13.3.0
+* Upgrade Flurry iOS SDK version to 12.0.0
+* Support initializing Flurry Push from the C# for Android
+* Merge Flurry Push with the standard release
+
+#### Bug Fixes
+
+* Add the missing FlurryEventParametersMismatched enum in EventRecordStatus
+
 ## v4.2.0 (2021-12-08)
 
 #### Features

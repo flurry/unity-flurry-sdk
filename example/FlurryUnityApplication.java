@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Oath Inc.
+ * Copyright 2022, Yahoo Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,7 @@ public class FlurryUnityApplication extends Application {
     private int     mWithLogLevel                           = Log.WARN;
     private boolean mWithMessaging                          = false;
 
+    private static boolean sMessagingInitialized = false;
     private static FlurryMessage sFlurryMessage = null;
     private static FlurryMessagingListener sFlurryMessagingListener = null;
 
@@ -111,6 +112,7 @@ public class FlurryUnityApplication extends Application {
 
                 FlurryMarketingModule marketingModule = new FlurryMarketingModule(flurryMessagingOptions);
                 builder.withModule(marketingModule);
+                sMessagingInitialized = true;
             }
 
             // Init Flurry
@@ -120,8 +122,32 @@ public class FlurryUnityApplication extends Application {
                     .withIncludeBackgroundSessionsInMetrics(mWithIncludeBackgroundSessionsInMetrics)
                     .withLogEnabled(mWithLogEnabled)
                     .withLogLevel(mWithLogLevel)
+                    .withSessionForceStart(true)
                     .build(this, mApiKey);
         }
+    }
+
+    /**
+     * Get FlurryMarketingModule.
+     * @return a default FlurryMarketingModule object
+     */
+    public static FlurryModule getFlurryMarketingModule() {
+        if (sMessagingInitialized) {
+            return null;
+        }
+
+        UnityFlurryMessagingListener messagingListener = new UnityFlurryMessagingListener();
+
+        FlurryMarketingOptions flurryMessagingOptions = new FlurryMarketingOptions.Builder()
+                .setupMessagingWithAutoIntegration()
+                .withFlurryMessagingListener(messagingListener)
+                // Define yours if needed
+                // .withDefaultNotificationChannelId(NOTIFICATION_CHANNEL_ID)
+                // .withDefaultNotificationIconResourceId(R.mipmap.ic_launcher_round)
+                // .withDefaultNotificationIconAccentColor(getResources().getColor(R.color.colorPrimary))
+                .build();
+
+        return new FlurryMarketingModule(flurryMessagingOptions);
     }
 
     /**
@@ -139,7 +165,7 @@ public class FlurryUnityApplication extends Application {
     /**
      * Wrapper Flurry Messaging listenet.
      */
-    class UnityFlurryMessagingListener implements FlurryMessagingListener {
+    static class UnityFlurryMessagingListener implements FlurryMessagingListener {
 
         @Override
         public boolean onNotificationReceived(FlurryMessage flurryMessage) {

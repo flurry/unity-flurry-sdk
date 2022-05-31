@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Oath Inc.
+ * Copyright 2022, Yahoo Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ namespace FlurrySDKInternal
         public static NetworkReachability internetReachability = Application.internetReachability;
 
         private static readonly string ORIGIN_NAME = "unity-flurry-sdk";
-        private static readonly string ORIGIN_VERSION = "4.2.0";
+        private static readonly string ORIGIN_VERSION = "5.0.0";
 
         private static AndroidJavaClass cls_FlurryAgent = new AndroidJavaClass("com.flurry.android.FlurryAgent");
         private static AndroidJavaClass cls_FlurryAgentConstants = new AndroidJavaClass("com.flurry.android.Constants");
@@ -81,9 +81,33 @@ namespace FlurrySDKInternal
                 obj_FlurryAgentBuilder.Call<AndroidJavaObject>("withLogLevel", (int) logLevel);
             }
 
-            public override void WithMessaging(bool enableMessaging)
+            public override void WithMessaging(bool enableMessaging, FlurrySDK.Flurry.IMessagingListener messagingListener)
             {
-                Debug.Log("To enable Flurry Messaging for Android, please remember to update your AndroidManifest.xml to setup the Messaging.");
+                Debug.Log("To customize Flurry Messaging for Android, please remember to update your AndroidManifest.xml to setup the Messaging.");
+
+                if (enableMessaging)
+                {
+                    try
+                    {
+                        AndroidJavaObject obj_FlurryMarketingOptionsBuilder = new AndroidJavaObject("com.flurry.android.marketing.FlurryMarketingOptions$Builder");
+                        obj_FlurryMarketingOptionsBuilder.Call<AndroidJavaObject>("setupMessagingWithAutoIntegration");
+
+                        if (messagingListener != null)
+                        {
+                            MessagingCallback callback = new MessagingCallback(messagingListener);
+                            obj_FlurryMarketingOptionsBuilder.Call<AndroidJavaObject>("withFlurryMessagingListener", callback);
+                        }
+                        AndroidJavaObject obj_FlurryMarketingOptions = obj_FlurryMarketingOptionsBuilder.Call<AndroidJavaObject>("build");
+
+                        AndroidJavaObject obj_FlurryMarketingModule = new AndroidJavaObject("com.flurry.android.marketing.FlurryMarketingModule", obj_FlurryMarketingOptions);
+                        obj_FlurryAgentBuilder.Call<AndroidJavaObject>("withModule", obj_FlurryMarketingModule);
+                    }
+                    catch (AndroidJavaException)
+                    {
+                        Debug.Log("To enable Flurry Messaging for Android, please remember to include Flurry Marketing libraries.");
+                    }
+                }
+
             }
 
             public override void WithDataSaleOptOut(bool isOptOut)
@@ -639,9 +663,10 @@ namespace FlurrySDKInternal
            Debug.Log("UpdateConversionValueWithEvent is for iOS only.");
         }
 
+        [Obsolete("please use Builder().WithMessaging() instead of SetMessagingListener()")]
         public override void SetMessagingListener(FlurrySDK.Flurry.IMessagingListener messagingListener)
         {
-            Debug.Log("To enable Flurry Messaging for Android, please remember to update your AndroidManifest.xml to setup the Messaging.");
+            Debug.Log("To customize Flurry Messaging for Android, please remember to update your AndroidManifest.xml to setup the Messaging.");
 
             if (messagingListener != null)
             {

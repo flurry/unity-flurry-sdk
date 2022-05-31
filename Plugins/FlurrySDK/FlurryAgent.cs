@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Oath Inc.
+ * Copyright 2022, Yahoo Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ namespace FlurrySDKInternal
 
             public abstract void WithLogLevel(FlurrySDK.Flurry.LogLevel logLevel);
 
-            public abstract void WithMessaging(bool enableMessaging);
+            public abstract void WithMessaging(bool enableMessaging, FlurrySDK.Flurry.IMessagingListener messagingListener);
             
             public abstract void WithDataSaleOptOut(bool isOptOut);
 
@@ -167,6 +167,7 @@ namespace FlurrySDKInternal
 
         public abstract void UpdateConversionValueWithEvent(FlurrySDK.Flurry.SKAdNetworkEvent flurryEvent);
 
+        [Obsolete("please use Builder().WithMessaging() instead of SetMessagingListener()")]
         public abstract void SetMessagingListener(FlurrySDK.Flurry.IMessagingListener messagingListener);
 
         [Obsolete("please use PublisherSegmentation.GetData() instead of GetPublisherSegmentation()")]
