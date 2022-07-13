@@ -23,14 +23,14 @@ using System.Diagnostics;
 using System;
 
 namespace FlurrySDK.Editor {
-    public class FlurryPodInstalling {
+    public class PodInstalling {
         private const string FRAMEWORK_TARGET_PATH = "Pods/Flurry-iOS-SDK"; // relative to build output folder
      
-        private const string FRAMEWORK_NAME_FLURRY = "Flurry";
-        private const string FRAMEWORK_NAME_CONFIG = "FlurryConfig";
+        private const string FRAMEWORK_NAME_FLURRY = "Flurry_iOS_SDK";
+        private const string FRAMEWORK_NAME_CONFIG = "Flurry_Config";
 
         // comment out if build non messaging package
-        private const string FRAMEWORK_NAME_MESSAGING = "FlurryMessaging";
+        private const string FRAMEWORK_NAME_MESSAGING = "Flurry_Messaging";
 
 
         [PostProcessBuildAttribute(40)]

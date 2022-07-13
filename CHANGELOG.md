@@ -3,6 +3,16 @@
 * [Flurry Android SDK Release Notes](https://developer.yahoo.com/flurry/docs/releasenotes/android/)
 * [Flurry iOS SDK Release Notes](https://developer.yahoo.com/flurry/docs/releasenotes/ios/)
 
+## v5.1.0 (2022-07-12)
+
+#### Features
+
+* Upgrade Flurry iOS SDK version to 12.1.1
+
+#### Bug Fixes
+
+* Fix iOS CocoaPods build failures
+
 # v5.0.0 (2022-06-02)
 
 #### Features

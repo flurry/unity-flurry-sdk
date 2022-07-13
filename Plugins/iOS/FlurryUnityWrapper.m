@@ -15,15 +15,10 @@
  */
 
 #import "FlurryUnityWrapper.h"
-#import "Flurry.h"
-#import "Flurry+Event.h"
-#import "FConfig.h"
-#import "FlurryConsent.h"
-#import "FlurrySKAdNetwork.h"
-#import "FlurrySessionBuilder.h"
-#import "FlurryUserProperties.h"
-#if __has_include("FlurryMessaging.h")
-#import "FlurryMessaging.h"
+#import <Flurry_iOS_SDK/Flurry_iOS_SDK.h>
+#import <Flurry_Config/Flurry_Config.h>
+#if __has_include(<Flurry_Messaging/Flurry_Messaging.h>)
+#import <Flurry_Messaging/Flurry_Messaging.h>
 #endif
 
 
@@ -74,7 +69,7 @@ static FlurryUnityWrapper *_sharedInstance;
     NSLog(@"Flurry session started");
     
     NSString* originName = @"unity-flurry-sdk";
-    NSString* originVersion = @"5.0.0";
+    NSString* originVersion = @"5.1.0";
     
     [Flurry addOrigin:originName withVersion:originVersion];
     
