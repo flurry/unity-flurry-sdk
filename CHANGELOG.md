@@ -3,6 +3,12 @@
 * [Flurry Android SDK Release Notes](https://developer.yahoo.com/flurry/docs/releasenotes/android/)
 * [Flurry iOS SDK Release Notes](https://developer.yahoo.com/flurry/docs/releasenotes/ios/)
 
+## v5.2.0 (2022-09-22)
+
+#### Features
+
+* Revert to static libraries for iOS release bundle.
+
 ## v5.1.0 (2022-07-12)
 
 #### Features

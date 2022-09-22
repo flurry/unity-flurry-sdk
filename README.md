@@ -25,7 +25,7 @@ The Flurry SDK Unity plugin is available via [the Unity Asset Store](https://ass
 
 - Download and install from [Github](https://github.com/flurry/unity-flurry-sdk)
 
-  1. Download the Flurry Unity package from [flurry-sdk-5.1.0.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-5.1.0.unitypackage).
+  1. Download the Flurry Unity package from [flurry-sdk-5.2.0.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-5.2.0.unitypackage).
      - If you are using Apple Xcode < 12, please use releases [flurry-sdk-3.3.0.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/archived-releases/flurry-sdk-3.3.0.unitypackage), or [flurry-sdk-3.3.0-push.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/archived-releases/flurry-sdk-3.3.0-push.unitypackage) if you want to use Flurry Push.
   2. Open your project in Unity Editor, choose menu **Assets** > **Import Package** > **Custom Package…** to bring up the File chooser, and select the package downloaded.
 
