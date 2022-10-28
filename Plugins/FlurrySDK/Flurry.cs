@@ -167,6 +167,20 @@ namespace FlurrySDK
             }
 
             /// <summary>
+            /// True to enable or false to disable Location report. Defaults to false.
+            /// </summary>
+            /// <returns>The builder.</returns>
+            /// <param name="reportLocation">If set to <c>true</c> to enable Location report.</param>
+            public Builder WithReportLocation(bool reportLocation = true)
+            {
+                if (builder != null)
+                {
+                    builder.WithReportLocation(reportLocation);
+                }
+                return this;
+            }
+
+            /// <summary>
             /// Enable Flurry add-on Messaging.
             /// </summary>
             /// <returns>The builder.</returns>

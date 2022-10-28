@@ -285,6 +285,11 @@ namespace FlurrySDKInternal
                 flurryWithLogLevel((int)logLevel);
             }
 
+            public override void WithReportLocation(bool reportLocation)
+            {
+                Debug.Log("This method is applied based on the user permissions of the app");
+            }
+             
             public override void WithAppVersion(string appVersion)
             {
                 flurryWithAppVersion(appVersion);

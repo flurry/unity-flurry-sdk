@@ -25,7 +25,7 @@ The Flurry SDK Unity plugin is available via [the Unity Asset Store](https://ass
 
 - Download and install from [Github](https://github.com/flurry/unity-flurry-sdk)
 
-  1. Download the Flurry Unity package from [flurry-sdk-5.2.0.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-5.2.0.unitypackage).
+  1. Download the Flurry Unity package from [flurry-sdk-6.0.0.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/flurry-sdk-6.0.0.unitypackage).
      - If you are using Apple Xcode < 12, please use releases [flurry-sdk-3.3.0.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/archived-releases/flurry-sdk-3.3.0.unitypackage), or [flurry-sdk-3.3.0-push.unitypackage](https://github.com/flurry/unity-flurry-sdk/raw/master/archived-releases/flurry-sdk-3.3.0-push.unitypackage) if you want to use Flurry Push.
   2. Open your project in Unity Editor, choose menu **Assets** > **Import Package** > **Custom Package…** to bring up the File chooser, and select the package downloaded.
 
@@ -131,6 +131,7 @@ There are some minor differences between the Android and iOS plugin:
                      .WithCrashReporting(true)
                      .WithLogEnabled(true)
                      .WithLogLevel(Flurry.LogLevel.DEBUG)
+                     .WithReportLocation(true)
                      .WithMessaging(true, new MyMessagingListener())
                      .Build(FLURRY_API_KEY);
    
@@ -295,6 +296,7 @@ See [Android](https://flurry.github.io/flurry-android-sdk/analytics/index.html)-
   Builder WithIncludeBackgroundSessionsInMetrics(bool includeBackgroundSessionsInMetrics);
   Builder WithLogEnabled(bool enableLog);
   Builder WithLogLevel(Flurry.LogLevel logLevel); // LogLevel = { VERBOSE, DEBUG, INFO, WARN, ERROR, ASSERT }
+  Builder WithReportLocation(bool reportLocation); // Android only
   Builder WithMessaging(bool enableMessaging, IMessagingListener messagingListener);
   Builder WithPerformanceMetrics(Flurry.Performance performanceMetrics); // Performance = { NONE, COLD_START, SCREEN_TIME, ALL }
   Builder WithSslPinningEnabled(bool sslPinningEnabled); // Android only

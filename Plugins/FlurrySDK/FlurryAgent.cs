@@ -37,6 +37,8 @@ namespace FlurrySDKInternal
 
             public abstract void WithLogLevel(FlurrySDK.Flurry.LogLevel logLevel);
 
+            public abstract void WithReportLocation(bool reportLocation);
+
             public abstract void WithMessaging(bool enableMessaging, FlurrySDK.Flurry.IMessagingListener messagingListener);
             
             public abstract void WithDataSaleOptOut(bool isOptOut);

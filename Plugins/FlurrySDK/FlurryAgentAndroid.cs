@@ -27,7 +27,7 @@ namespace FlurrySDKInternal
         public static NetworkReachability internetReachability = Application.internetReachability;
 
         private static readonly string ORIGIN_NAME = "unity-flurry-sdk";
-        private static readonly string ORIGIN_VERSION = "5.2.0";
+        private static readonly string ORIGIN_VERSION = "6.0.0";
 
         private static AndroidJavaClass cls_FlurryAgent = new AndroidJavaClass("com.flurry.android.FlurryAgent");
         private static AndroidJavaClass cls_FlurryAgentConstants = new AndroidJavaClass("com.flurry.android.Constants");
@@ -36,7 +36,14 @@ namespace FlurrySDKInternal
 
         public class AgentBuilderAndroid : AgentBuilder
         {
-            private AndroidJavaObject obj_FlurryAgentBuilder = new AndroidJavaObject("com.flurry.android.FlurryAgent$Builder");
+            private AndroidJavaObject obj_FlurryAgentBuilder;
+
+            public AgentBuilderAndroid()
+            {
+                obj_FlurryAgentBuilder = new AndroidJavaObject("com.flurry.android.FlurryAgent$Builder");
+                obj_FlurryAgentBuilder.Call<AndroidJavaObject>("withSessionForceStart", true);
+                obj_FlurryAgentBuilder.Call<AndroidJavaObject>("withReportLocation", true);
+            }
 
             public override void Build(string apiKey)
             {
@@ -45,7 +52,6 @@ namespace FlurrySDKInternal
                     using (AndroidJavaObject obj_Activity = cls_UnityPlayer.GetStatic<AndroidJavaObject>("currentActivity"))
                     {
                         cls_FlurryAgent.CallStatic("addOrigin", ORIGIN_NAME, ORIGIN_VERSION);
-                        obj_FlurryAgentBuilder.Call<AndroidJavaObject>("withSessionForceStart", true);
                         obj_FlurryAgentBuilder.Call("build", obj_Activity, apiKey);
                     }
                 }
@@ -79,6 +85,11 @@ namespace FlurrySDKInternal
             public override void WithLogLevel(FlurrySDK.Flurry.LogLevel logLevel)
             {
                 obj_FlurryAgentBuilder.Call<AndroidJavaObject>("withLogLevel", (int) logLevel);
+            }
+
+            public override void WithReportLocation(bool reportLocation)
+            {
+                obj_FlurryAgentBuilder.Call<AndroidJavaObject>("withReportLocation", reportLocation);
             }
 
             public override void WithMessaging(bool enableMessaging, FlurrySDK.Flurry.IMessagingListener messagingListener)
