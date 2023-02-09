@@ -95,7 +95,22 @@ namespace FlurrySDK
                 }
                 return this;
             }
-            
+
+            /// <summary>
+            /// Set Flurry Consent for the IAB Global Privacy Platform (GPP). To pass an IAB string to Flurry.
+            /// </summary>
+            /// <returns>The builder.</returns>
+            /// <param name="gppString">IAB GPP String.</param>
+            /// <param name="gppSectionIds">Integer set of IAB GPP section ids that are applicable for this bid request.</param>
+            public Builder WithGppConsent(string gppString, ISet<int> gppSectionIds)
+            {
+                if (builder != null)
+                {
+                    builder.WithGppConsent(gppString, gppSectionIds);
+                }
+                return this;
+            }
+
             /// <summary>
             /// An api to send ccpa compliance data to Flurry on the user's choice to opt out or opt in to data sale to third parties. The default is false
             /// </summary>
@@ -987,6 +1002,22 @@ namespace FlurrySDK
             {
                 flurryAgent.AddSessionProperty(name, value);
             }
+        }
+
+        /// <summary>
+        /// Set Flurry Consent for the IAB Global Privacy Platform (GPP). To pass an IAB string to Flurry.
+        /// </summary>
+        /// <param name="gppString">IAB GPP String.</param>
+        /// <param name="gppSectionIds">Integer set of IAB GPP section ids that are applicable for this bid request.</param>
+        /// <returns>True if consent is valid, false otherwise.</returns>
+        public static bool SetGppConsent(string gppString, ISet<int> gppSectionIds)
+        {
+            if (flurryAgent != null)
+            {
+                return flurryAgent.SetGppConsent(gppString, gppSectionIds);
+            }
+
+            return false;
         }
 
         /// <summary>

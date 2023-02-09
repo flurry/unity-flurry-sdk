@@ -259,6 +259,11 @@ namespace FlurrySDKInternal
                 flurryWithCrashReporting(crashReporting);
             }
 
+            public override void WithGppConsent(string gppString, ISet<int> gppSectionIds)
+            {
+                Debug.Log("Flurry iOS SDK does not implement WithGppConsent method.");
+            }
+
             public override void WithDataSaleOptOut(bool isOptOut)
             {
                 flurryWithDataSaleOptOut(isOptOut);
@@ -622,6 +627,12 @@ namespace FlurrySDKInternal
         public override void AddSessionProperty(string name, string value)
         {
             flurryAddSessionProperty(name, value);
+        }
+
+        public override bool SetGppConsent(string gppString, ISet<int> gppSectionIds)
+        {
+            Debug.Log("Flurry iOS SDK does not implement SetGppConsent method.");
+            return false;
         }
 
         public override void SetDataSaleOptOut(bool isOptOut)

@@ -27,7 +27,7 @@ namespace FlurrySDKInternal
         public static NetworkReachability internetReachability = Application.internetReachability;
 
         private static readonly string ORIGIN_NAME = "unity-flurry-sdk";
-        private static readonly string ORIGIN_VERSION = "6.0.0";
+        private static readonly string ORIGIN_VERSION = "6.1.0";
 
         private static AndroidJavaClass cls_FlurryAgent = new AndroidJavaClass("com.flurry.android.FlurryAgent");
         private static AndroidJavaClass cls_FlurryAgentConstants = new AndroidJavaClass("com.flurry.android.Constants");
@@ -119,6 +119,11 @@ namespace FlurrySDKInternal
                     }
                 }
 
+            }
+
+            public override void WithGppConsent(string gppString, ISet<int> gppSectionIds)
+            {
+                obj_FlurryAgentBuilder.Call<AndroidJavaObject>("withGppConsent", gppString, ConvertToSet(gppSectionIds));
             }
 
             public override void WithDataSaleOptOut(bool isOptOut)
@@ -460,6 +465,11 @@ namespace FlurrySDKInternal
             cls_FlurryAgent.CallStatic("addSessionProperty", name, value);
         }
 
+        public override bool SetGppConsent(string gppString, ISet<int> gppSectionIds)
+        {
+            return cls_FlurryAgent.CallStatic<bool>("setGppConsent", gppString, ConvertToSet(gppSectionIds));
+        }
+
         public override void SetDataSaleOptOut(bool isOptOut)
         {
             cls_FlurryAgent.CallStatic("setDataSaleOptOut", isOptOut);
@@ -528,7 +538,8 @@ namespace FlurrySDKInternal
             if (result != null)
             {
                 return result.Call<int>("ordinal");
-            } else
+            }
+            else
             {
                 return 0;
             }
@@ -591,7 +602,8 @@ namespace FlurrySDKInternal
             if (result != null)
             {
                 return result.Call<int>("ordinal");
-            } else
+            }
+            else
             {
                 return 0;
             }
@@ -610,7 +622,8 @@ namespace FlurrySDKInternal
                     {
                         AndroidJavaObject javaEventParam = cls_FlurryEventParam.GetStatic<AndroidJavaObject>(pair.Key.ToString());
                         obj_HashMap.Call<AndroidJavaObject>("put", javaEventParam, pair.Value);
-                    } else
+                    }
+                    else
                     {
                         obj_HashMap.Call<AndroidJavaObject>("put", pair.Key, pair.Value);
                     }
@@ -731,6 +744,31 @@ namespace FlurrySDKInternal
             }
 
             return obj_ArrayList;
+        }
+
+        private static AndroidJavaObject ConvertToSet<TValue>(ISet<TValue> set)
+        {
+            AndroidJavaObject obj_HashSet = new AndroidJavaObject("java.util.HashSet");
+            if (set != null)
+            {
+                // Need to handle Set<int> here.
+                if (typeof(TValue) == typeof(int))
+                {
+                    foreach (TValue value in set)
+                    {
+                        obj_HashSet.Call<bool>("add", new AndroidJavaObject("java.lang.Integer", value));
+                    }
+                }
+                else
+                {
+                    foreach (TValue value in set)
+                    {
+                        obj_HashSet.Call<bool>("add", value);
+                    }
+                }
+            }
+
+            return obj_HashSet;
         }
 
         private static AndroidJavaObject ConvertToMap<TKey, TValue>(IDictionary<TKey, TValue> dictionary)

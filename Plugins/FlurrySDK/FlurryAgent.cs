@@ -40,7 +40,9 @@ namespace FlurrySDKInternal
             public abstract void WithReportLocation(bool reportLocation);
 
             public abstract void WithMessaging(bool enableMessaging, FlurrySDK.Flurry.IMessagingListener messagingListener);
-            
+
+            public abstract void WithGppConsent(string gppString, ISet<int> gppSectionIds);
+
             public abstract void WithDataSaleOptOut(bool isOptOut);
 
             public abstract void WithPerformanceMetrics(int performanceMetrics);
@@ -125,6 +127,8 @@ namespace FlurrySDKInternal
         public abstract void AddOrigin(string originName, string originVersion, IDictionary<string, string> originParameters);
 
         public abstract void AddSessionProperty(string name, string value);
+
+        public abstract bool SetGppConsent(string gppString, ISet<int> gppSectionIds);
 
         public abstract void SetDataSaleOptOut(bool isOptOut);
 
